@@ -1,0 +1,6 @@
+enumStats = luajava.bindClass(enumStat)
+
+function onUse(actor)
+	actor:modifyActorStat(enumStats.HP, 15)
+	anvilLog("Modifying actor: "..actor:getActorId().." stat "..enumStats.HP:name().." with the value "..15)
+end
