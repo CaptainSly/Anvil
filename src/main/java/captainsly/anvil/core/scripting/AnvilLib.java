@@ -6,6 +6,12 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 
+import com.bernardomg.tabletop.dice.history.RollHistory;
+import com.bernardomg.tabletop.dice.interpreter.DiceInterpreter;
+import com.bernardomg.tabletop.dice.interpreter.DiceRoller;
+import com.bernardomg.tabletop.dice.parser.DefaultDiceParser;
+import com.bernardomg.tabletop.dice.parser.DiceParser;
+
 import captainsly.Main;
 
 public class AnvilLib extends TwoArgFunction {
@@ -42,6 +48,9 @@ public class AnvilLib extends TwoArgFunction {
 		env.set("classAnvil", AnvilPlatform.ANVIL_CLASS);
 		env.set("classItem", AnvilPlatform.ITEM_CLASS);
 
+		// Dice Rolling Functions
+		env.set("rollDice", new RollDice());
+
 		// Util Functions
 		env.set("anvilLog", new AnvilLog());
 		return env;
@@ -56,10 +65,25 @@ public class AnvilLib extends TwoArgFunction {
 				if (i > 1)
 					globals.STDOUT.print('\t');
 				LuaString s = tostring.call(arg.arg(i)).strvalue();
-				Main.log.debug("[Anvil Scripting] - " + s.tojstring());
+				Main.log.debug("[Anvil Scripting]: " + s.tojstring());
 			}
 			return NONE;
 		}
+	}
+
+	final class RollDice extends OneArgFunction {
+
+		@Override
+		public LuaValue call(LuaValue arg) {
+			LuaValue tostring = globals.get("tostring");
+			LuaString roll = tostring.call(arg.arg(1)).strvalue();
+			final DiceParser parser = new DefaultDiceParser();
+			final DiceInterpreter<RollHistory> roller = new DiceRoller();
+			final RollHistory rolls = parser.parse(roll.tojstring(), roller);
+
+			return LuaValue.valueOf(rolls.getTotalRoll());
+		}
+
 	}
 
 }

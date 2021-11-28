@@ -21,7 +21,11 @@ repositories {
 
 dependencies {
 	
+	// Other Deps
+	implementation 'com.bernardomg.tabletop:dice:2.1.2'
 	implementation "com.google.code.gson:gson:$gsonVersion"
+	
+	// JavaFX
 	implementation "de.jensd:fontawesomefx:$fontfxVersion"
 	implementation 'org.controlsfx:controlsfx:11.1.0'
 
