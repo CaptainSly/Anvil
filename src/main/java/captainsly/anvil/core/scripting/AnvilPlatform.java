@@ -20,10 +20,9 @@ public class AnvilPlatform {
 
 	// Classes that are referenced in lua
 	public static final String EQUIPMENT_CLASS = "captainsly.anvil.mechanics.items.equipment.Equipment";
-	public static final String EQUIPMENT_STAT_ENUM = "captainsly.anvil.mechanics.enums.EnumEquipmentStat";
 	public static final String EQUIPMENT_SLOT_TYPE_ENUM = "captainsly.anvil.mechanics.enums.EnumEquipmentSlotType";
 	public static final String STAT_ENUM = "captainsly.anvil.mechanics.enums.EnumStat";
-	public static final String SKILL_ENUM = "captainsly.anvil.mechanics.enums.EnumSkill";
+	public static final String ABILITY_ENUM = "captainsly.anvil.mechanics.enums.EnumAbility";
 	public static final String DIRECTION_ENUM = "captainsly.anvil.mechanics.enums.EnumDirection";
 	public static final String PROFESSION_ENUM = "captainsly.anvil.mechanics.enums.EnumProfession";
 	public static final String GAME_EVENT_CLASS = "captainsly.anvil.mechanics.events.GameEvent";

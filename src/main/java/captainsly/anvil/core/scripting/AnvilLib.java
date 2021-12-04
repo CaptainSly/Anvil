@@ -33,10 +33,9 @@ public class AnvilLib extends TwoArgFunction {
 		env.set("anvilVersion", "Anvil Scripting Platform Version: " + Main.APPLICATION_VERSION);
 
 		// Enum Declaration Strings
-		env.set("enumEquipmentStat", AnvilPlatform.EQUIPMENT_STAT_ENUM);
 		env.set("enumEquipmentSlotType", AnvilPlatform.EQUIPMENT_SLOT_TYPE_ENUM);
-		env.set("enumStat", AnvilPlatform.STAT_ENUM);
-		env.set("enumSkill", AnvilPlatform.SKILL_ENUM);
+		env.set("enumAbility", AnvilPlatform.STAT_ENUM);
+		env.set("enumSkill", AnvilPlatform.ABILITY_ENUM);
 		env.set("enumProfession", AnvilPlatform.PROFESSION_ENUM);
 		env.set("enumDirection", AnvilPlatform.DIRECTION_ENUM);
 

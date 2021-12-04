@@ -5,13 +5,17 @@ import captainsly.anvil.mechanics.enums.EnumSkill;
 public class CharacterClass {
 
 	// TODO: Fill out the Character Class and implement what is missing
-	
+
 	protected final String characterClassId;
+	private String characterClassName;
+	private String characterClassDesc;
 
 	private int[] characterClassBonuses;
 
-	public CharacterClass(String characterClassId) {
+	public CharacterClass(String characterClassId, String characterClassName, String characterClassDesc) {
 		this.characterClassId = characterClassId;
+		this.characterClassName = characterClassName;
+		this.characterClassDesc = characterClassDesc;
 
 		characterClassBonuses = new int[EnumSkill.values().length];
 	}
@@ -34,6 +38,14 @@ public class CharacterClass {
 
 	public String getCharacterClassId() {
 		return characterClassId;
+	}
+
+	public String getCharacterClassName() {
+		return characterClassName;
+	}
+
+	public String getCharacterClassDesc() {
+		return characterClassDesc;
 	}
 
 	public int getCharacterClassSkillBonus(EnumSkill skill) {

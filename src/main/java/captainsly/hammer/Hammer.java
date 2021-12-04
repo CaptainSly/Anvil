@@ -1,6 +1,5 @@
 package captainsly.hammer;
 
-import captainsly.hammer.core.ui.EquipmentTab;
 import captainsly.hammer.core.ui.LocationTab;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -22,7 +21,7 @@ public class Hammer extends Application {
 		tabPane = new TabPane();
 		menuBar = new MenuBar();
 
-		tabPane.getTabs().addAll(new EquipmentTab(), new LocationTab());
+		tabPane.getTabs().addAll(new LocationTab());
 
 		rootBP.setTop(menuBar);
 		rootBP.setCenter(tabPane);

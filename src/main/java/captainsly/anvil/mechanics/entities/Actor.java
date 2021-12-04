@@ -4,13 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import captainsly.Main;
 import captainsly.anvil.mechanics.container.EquipmentSlot;
 import captainsly.anvil.mechanics.container.Inventory;
 import captainsly.anvil.mechanics.entities.actrace.ActorRace;
 import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
 import captainsly.anvil.mechanics.enums.EnumEquipmentSlotType;
 import captainsly.anvil.mechanics.enums.EnumSkill;
-import captainsly.anvil.mechanics.enums.EnumStat;
+import captainsly.anvil.mechanics.enums.EnumAbility;
 import captainsly.anvil.mechanics.factions.Faction;
 import captainsly.anvil.mechanics.items.equipment.Equipment;
 
@@ -24,11 +25,12 @@ public abstract class Actor implements Serializable {
 
 	private final List<Faction> actorFactionList;
 
-	private final ActorRace actorRace;
-	private final CharacterClass actorCharacterClass;
+	private ActorRace actorRace;
+	private CharacterClass actorCharacterClass;
 
-	private int[] actorStats;
+	private int[] actorAbilityScores;
 	private int[] actorSkills, actorSkillsXp;
+	private int actorArmorClass;
 
 	// Equipment and Inventory
 	private final Inventory actorInventory;
@@ -37,23 +39,25 @@ public abstract class Actor implements Serializable {
 	private EquipmentSlot[] ringEquipmentSlots;
 	private EquipmentSlot[] amuletEquipmentSlots;
 
-	public Actor(String actorId) {
+	public Actor(String actorId, ActorRace actorRace, CharacterClass actorCharacterClass) {
 		this.actorId = actorId;
+		this.actorRace = actorRace;
+		this.actorCharacterClass = actorCharacterClass;
+
 		actorInventory = new Inventory();
 		actorFactionList = new ArrayList<>();
 
-		actorRace = new ActorRace("testActorRace");
-		actorCharacterClass = new CharacterClass("testCharacterClass");
-
-		actorStats = new int[EnumStat.values().length];
+		actorAbilityScores = new int[EnumAbility.values().length];
 		actorSkills = new int[EnumSkill.values().length];
 		actorSkillsXp = new int[EnumSkill.values().length];
 
 		// Add The Actor's Racial Bonus to their stats and Skill Bonuses
-		for (int i = 0; i < actorStats.length; i++) {
-			actorStats[i] += actorRace.getActorRaceBenefits()[i];
+		for (int i = 0; i < actorAbilityScores.length; i++) {
+			actorAbilityScores[i] += actorRace.getActorRaceBenefits()[i];
 			actorSkills[i] += actorCharacterClass.getCharacterClassSkillBonuses()[i];
 		}
+
+		actorArmorClass = 10 + getAbilityModifier(getActorAbilityScore(EnumAbility.DEXTERITY));
 
 		// Setup Equipment Slots
 		amuletEquipmentSlots = new EquipmentSlot[5]; // Does your chain hang low?
@@ -72,30 +76,102 @@ public abstract class Actor implements Serializable {
 
 	}
 
-	public void modifyActorStat(EnumStat stat, int amount) {
-		actorStats[stat.ordinal()] += amount;
-		if (actorStats[stat.ordinal()] < 0)
-			actorStats[stat.ordinal()] = 0;
+	public int getAbilityModifier(int abilityScore) {
+		return (int) Math.floor((abilityScore - 10) / 2);
+	}
+
+	public void modifyArmorClass(int amount) {
+		actorArmorClass += amount;
+	}
+
+	public void modifyActorAbilityScore(EnumAbility stat, int amount) {
+		actorAbilityScores[stat.ordinal()] += amount;
 	}
 
 	public void modifyActorSkill(EnumSkill skill, int amount) {
 		actorSkills[skill.ordinal()] += amount;
-		if (actorSkills[skill.ordinal()] < 0)
-			actorSkills[skill.ordinal()] = 0;
 	}
 
 	public void modifyActorSkillXp(EnumSkill skill, int amount) {
 		actorSkillsXp[skill.ordinal()] += amount;
-		if (actorSkillsXp[skill.ordinal()] < 0)
-			actorSkillsXp[skill.ordinal()] = 0;
 	}
 
 	public void equipEquipment(Equipment equipment) {
-		// TODO: Equip equipment on actor
+		switch (equipment.getEquipSlotType()) {
+		case NECK:
+			Main.log.debug("Equiping a neck type item");
+
+			// Find the first empty slot inside the neckEquipment array
+			for (EquipmentSlot slot : amuletEquipmentSlots) {
+				if (slot != null && slot.isEmpty()) // None of the slots should equal null, but just in case
+					slot.addEquipment(equipment);
+				else
+					continue;
+			}
+
+			break;
+		case RINGS:
+			Main.log.debug("Equiping a ring type item");
+
+			// Find the first empty slot inside the ringEquipment array
+			for (EquipmentSlot slot : ringEquipmentSlots) {
+				if (slot != null && slot.isEmpty())
+					slot.addEquipment(equipment);
+				else
+					continue;
+			}
+
+			break;
+		default:
+			Main.log.debug("Equipping to slot type: " + equipment.getEquipSlotType());
+			EquipmentSlot s = armorEquipmentSlots[equipment.getEquipSlotType().ordinal()];
+
+			if (s.isEmpty())
+				s.addEquipment(equipment);
+			else {
+				replaceSlot(s, equipment);
+			}
+			break;
+
+		}
+
+		equipment.onEquip(this);
+	}
+
+	private void replaceSlot(EquipmentSlot slot, Equipment equipment) {
+		// Unequip and remove the current equipment from the slot
+		slot.getSlotEquipment().onUnequip(this);
+		slot.removeEquipment();
+
+		// Add the new equipment then invoke the onEquip method with the current actor
+		// as the parameter
+		slot.addEquipment(equipment);
+		slot.getSlotEquipment().onEquip(this);
 	}
 
 	public void unequipEquipment(EquipmentSlot slot) {
-		// TODO: Unequip equipment from actor
+		slot.getSlotEquipment().onUnequip(this);
+		slot.removeEquipment();
+	}
+	
+	public void setActorName(String actorName) {
+		this.actorName = actorName;
+	}
+
+	public void setActorAbilityScores(int[] actorAbilityScores) {
+		this.actorAbilityScores = actorAbilityScores;
+	}
+
+	public void setActorSkills(int[] actorSkills) {
+		this.actorSkills = actorSkills;
+	}
+
+	public void setActorRace(ActorRace actorRace) {
+		this.actorRace = actorRace;
+	}
+
+	public void setActorCharacterClass(CharacterClass actorCharacterClass) {
+		this.actorCharacterClass = actorCharacterClass;
 	}
 
 	public String getActorId() {
@@ -114,8 +190,21 @@ public abstract class Actor implements Serializable {
 		return actorCharacterClass;
 	}
 
-	public int getActorStat(EnumStat stat) {
-		return actorStats[stat.ordinal()];
+	public int getActorArmorClass() {
+		return actorArmorClass;
+	}
+
+	public int getActorTotalLevel() {
+		// The Player's Level is a total of all there skills
+		int level = 0;
+		for (int i : actorSkills)
+			level += i;
+
+		return level;
+	}
+
+	public int getActorAbilityScore(EnumAbility stat) {
+		return actorAbilityScores[stat.ordinal()];
 	}
 
 	public int getActorSkill(EnumSkill skill) {
@@ -126,8 +215,8 @@ public abstract class Actor implements Serializable {
 		return actorSkillsXp[skill.ordinal()];
 	}
 
-	public int[] getActorStats() {
-		return actorStats;
+	public int[] getActorAbilityScores() {
+		return actorAbilityScores;
 	}
 
 	public int[] getActorSkills() {

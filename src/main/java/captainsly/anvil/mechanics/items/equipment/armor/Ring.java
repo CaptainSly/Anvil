@@ -7,8 +7,8 @@ public class Ring extends Equipment {
 
 	private static final long serialVersionUID = 3515438482089285851L;
 
-	public Ring(String equipmentId, String equipmentName) {
-		super(equipmentId, equipmentName, EnumEquipmentSlotType.RINGS);
+	public Ring(String equipmentId, String equipmentName, int armorClassModifier) {
+		super(equipmentId, equipmentName, EnumEquipmentSlotType.RINGS, armorClassModifier);
 	}
 
 }

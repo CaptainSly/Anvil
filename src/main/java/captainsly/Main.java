@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import captainsly.anvil.core.scripting.AnvilPlatform;
 import captainsly.anvil.ui.Anvil;
 import captainsly.hammer.Hammer;
-import captainsly.utils.FileHandler;
+import captainsly.utils.Utils;
 import javafx.application.Application;
 
 public class Main {
@@ -39,8 +39,8 @@ public class Main {
 				log.info("Switch mode. Argument: " + args[1]);
 				log.info("Checking to see if the working directory exists");
 
-				if (!FileHandler.doesWorkingDirExist())
-					FileHandler.createDefaultWorkingDir();
+				if (!Utils.doesWorkingDirExist())
+					Utils.createDefaultWorkingDir();
 
 				log.info("Creating LuaJ globals with the AnvilPlatform Globals");
 				globals = AnvilPlatform.standardGlobals();
