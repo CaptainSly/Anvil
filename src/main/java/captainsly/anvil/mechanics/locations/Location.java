@@ -3,6 +3,7 @@ package captainsly.anvil.mechanics.locations;
 import java.util.ArrayList;
 import java.util.List;
 
+import captainsly.anvil.core.Registry;
 import captainsly.anvil.mechanics.entities.Actor;
 import captainsly.anvil.mechanics.enums.EnumDirection;
 import captainsly.anvil.mechanics.events.GameEvent;
@@ -13,7 +14,7 @@ public class Location {
 
 	private String locationName, locationDescription;
 
-	private Location[] neighboringLocations;
+	private String[] neighboringLocations;
 
 	private List<Actor> locationActorsList;
 	private List<GameEvent> locationActionsList;
@@ -24,7 +25,7 @@ public class Location {
 		locationActorsList = new ArrayList<>();
 		locationActionsList = new ArrayList<>();
 
-		neighboringLocations = new Location[EnumDirection.values().length];
+		neighboringLocations = new String[EnumDirection.values().length];
 	}
 
 	public void setLocationName(String locationName) {
@@ -35,17 +36,28 @@ public class Location {
 		this.locationDescription = locationDescription;
 	}
 
-	public void addNeighborLocation(Location location, EnumDirection dir) {
-		neighboringLocations[dir.ordinal()] = location;
-		location.neighboringLocations[dir.opposite().ordinal()] = this;
+	public void addNeighborLocation(String locationId, EnumDirection dir) {
+		neighboringLocations[dir.ordinal()] = locationId;
 	}
 
-	public Location[] getNeighborLocations() {
+	public void addLocationEvent(GameEvent event) {
+		locationActionsList.add(event);
+	}
+	
+	public void addLocationActor(Actor actor) {
+		locationActorsList.add(actor);
+	}
+	
+	public String[] getNeighborLocationIds() {
 		return neighboringLocations;
 	}
 
-	public Location getNeighboringLocation(EnumDirection dir) {
+	public String getNeighboringLocationId(EnumDirection dir) {
 		return neighboringLocations[dir.ordinal()];
+	}
+
+	public Location getNeighboringLocation(EnumDirection dir) {
+		return Registry.locationsMap.get(getNeighboringLocationId(dir));
 	}
 
 	public List<Actor> getLocationActorsList() {

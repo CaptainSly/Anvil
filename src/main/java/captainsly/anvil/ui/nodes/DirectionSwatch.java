@@ -1,8 +1,10 @@
 package captainsly.anvil.ui.nodes;
 
+import captainsly.anvil.core.Registry;
 import captainsly.anvil.mechanics.enums.EnumDirection;
 import captainsly.anvil.mechanics.locations.Location;
 import captainsly.anvil.ui.Anvil;
+import captainsly.utils.Utils;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Button;
@@ -33,28 +35,28 @@ public class DirectionSwatch extends Region {
 		btnNorth.setGraphic(GlyphsDude.createIcon(FontAwesomeIcon.ARROW_UP));
 		btnNorth.setDisable(true);
 		btnNorth.setOnAction(e -> {
-			setCurrentLocation(currentLocation.getNeighboringLocation(EnumDirection.NORTH));
+			setCurrentLocation(currentLocation.getNeighboringLocationId(EnumDirection.NORTH));
 		});
 
 		btnSouth = new Button();
 		btnSouth.setGraphic(GlyphsDude.createIcon(FontAwesomeIcon.ARROW_DOWN));
 		btnSouth.setDisable(true);
 		btnSouth.setOnAction(e -> {
-			setCurrentLocation(currentLocation.getNeighboringLocation(EnumDirection.SOUTH));
+			setCurrentLocation(currentLocation.getNeighboringLocationId(EnumDirection.SOUTH));
 		});
 
 		btnEast = new Button();
 		btnEast.setGraphic(GlyphsDude.createIcon(FontAwesomeIcon.ARROW_RIGHT));
 		btnEast.setDisable(true);
 		btnEast.setOnAction(e -> {
-			setCurrentLocation(currentLocation.getNeighboringLocation(EnumDirection.EAST));
+			setCurrentLocation(currentLocation.getNeighboringLocationId(EnumDirection.EAST));
 		});
 
 		btnWest = new Button();
 		btnWest.setGraphic(GlyphsDude.createIcon(FontAwesomeIcon.ARROW_LEFT));
 		btnWest.setDisable(true);
 		btnWest.setOnAction(e -> {
-			setCurrentLocation(currentLocation.getNeighboringLocation(EnumDirection.WEST));
+			setCurrentLocation(currentLocation.getNeighboringLocationId(EnumDirection.WEST));
 		});
 
 		rootGrid.add(btnNorth, 1, 0);
@@ -79,8 +81,8 @@ public class DirectionSwatch extends Region {
 		return text + locationText;
 	}
 
-	public void setCurrentLocation(Location currentLocation) {
-		this.currentLocation = currentLocation;
+	public void setCurrentLocation(String currentLocationId) {
+		this.currentLocation = Registry.locationsMap.get(currentLocationId);
 		anvil.setCurrentLocation(currentLocation);
 		anvil.clearConsole();
 
@@ -104,11 +106,12 @@ public class DirectionSwatch extends Region {
 		anvil.writeToConsole(currentLocation.getLocationDescription() + "\n\n");
 
 		// Write out the neighbor locations
-		for (int i = 0; i < currentLocation.getNeighborLocations().length; i++) {
-			Location location = currentLocation.getNeighborLocations()[i];
+		for (int i = 0; i < currentLocation.getNeighborLocationIds().length; i++) {
+			Location location = Registry.locationsMap.get(currentLocation.getNeighborLocationIds()[i]);
 
 			if (location != null) {
-				anvil.writeToConsole(location.getLocationName() + " is to the " + EnumDirection.values()[i].name() + "\n");
+				anvil.writeToConsole("\n" + location.getLocationName() + " is to the "
+						+ Utils.toNormalCase(EnumDirection.values()[i].name()));
 			}
 		}
 

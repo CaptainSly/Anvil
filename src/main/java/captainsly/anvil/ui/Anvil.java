@@ -1,20 +1,34 @@
 package captainsly.anvil.ui;
 
-import captainsly.anvil.mechanics.enums.EnumDirection;
-import captainsly.anvil.mechanics.items.Potion;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+import captainsly.anvil.core.Registry;
+import captainsly.anvil.mechanics.entities.actrace.ActorRace;
+import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
 import captainsly.anvil.mechanics.locations.Location;
+import captainsly.anvil.mechanics.objBuilders.ActorRaceBuilder.ActorRaceStringConverter;
+import captainsly.anvil.mechanics.objBuilders.CharacterClassBuilder.CharacterClassStringConverter;
 import captainsly.anvil.mechanics.player.Player;
 import captainsly.anvil.mechanics.world.GameWorld;
 import captainsly.anvil.ui.nodes.DirectionSwatch;
 import captainsly.anvil.ui.nodes.EquipmentSwatch;
 import captainsly.anvil.ui.nodes.InventoryView;
+import captainsly.anvil.ui.nodes.PlayerStatsView;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -33,8 +47,9 @@ public class Anvil extends Application {
 	private DirectionSwatch dirSwatch;
 	private EquipmentSwatch equipmentSwatch;
 	private InventoryView inventoryView;
-	private static TextArea interactionTextArea;
-	private Location currentLocation, testLoc;
+	private TextArea interactionTextArea;
+	private PlayerStatsView playerStatView;
+	private Location currentLocation;
 
 	private GameWorld gameWorld;
 
@@ -46,37 +61,24 @@ public class Anvil extends Application {
 		menuHBox = new HBox();
 		playerOptionsVBox = new VBox();
 
-		testLoc = new Location("testLoc2");
-		testLoc.setLocationName("TEST 2");
-		testLoc.setLocationDescription("CAW CAW");
-
-		currentLocation = new Location("testLocation001");
-		currentLocation.setLocationName("Test Location");
-		currentLocation.setLocationDescription("TEST LOCATION DESCRIPTION");
-		currentLocation.addNeighborLocation(testLoc, EnumDirection.NORTH);
+		currentLocation = Registry.locationsMap.get("locationCalinfor");
 
 		interactionTextArea = new TextArea();
+		interactionTextArea.setWrapText(true);
 		interactionTextArea.setEditable(false);
-		interactionTextArea.setStyle("-fx-font-size: 18");
+//		interactionTextArea.setStyle("-fx-font-size: 18");
 
 		// Show the creation dialog, then create the gameworld
-		// TODO: Fix player creation 
-		
-		Player player = new Player();
-		Button btn = new Button("TEST");
+		// TODO: Fix player creation
 
+		Player player = createPlayer();
+		
 		gameWorld = new GameWorld(this, player);
 
 		inventoryView = new InventoryView(player);
 		equipmentSwatch = new EquipmentSwatch(player);
+		playerStatView = new PlayerStatsView(player);
 		dirSwatch = new DirectionSwatch(this);
-
-		Potion i = new Potion("potionTest", "Test Potion");
-		i.setPotionScript("potionTest.lua");
-
-		btn.setOnAction(e -> i.onUse(player));
-
-		player.getActorInventory().addItem(i, 1);
 
 		setLocation(currentLocation);
 
@@ -86,7 +88,7 @@ public class Anvil extends Application {
 		sep.setPadding(new Insets(1.5f, 0f, 1.5f, 0f));
 
 		playerOptionsVBox.setPadding(new Insets(5, 5, 5, 5));
-		playerOptionsVBox.getChildren().addAll(equipmentSwatch, sep, dirSwatch, inventoryView, btn);
+		playerOptionsVBox.getChildren().addAll(playerStatView, equipmentSwatch, sep, dirSwatch, inventoryView);
 
 		controlBP.setLeft(playerOptionsVBox);
 
@@ -107,160 +109,83 @@ public class Anvil extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
-	/**
+
 	private Player createPlayer() {
-		Player player = new Player();
+		Dialog<Player> dialog = new Dialog<>();
+		ButtonType createPlayerType = new ButtonType("Create Player", ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().add(createPlayerType);
 
-		Dialog<Player> playerCreationDialog = new Dialog<>();
-
-		GridPane statGridPane = new GridPane();
-		GridPane skillGridPane = new GridPane();
-		GridPane playerInfoGridPane = new GridPane();
-		BorderPane playerBP = new BorderPane();
-
-		ButtonType acceptButton = new ButtonType("Create", ButtonData.OK_DONE);
-
-		playerCreationDialog.setResizable(true);
-		playerCreationDialog.setTitle("Create Player");
-		playerCreationDialog.setHeaderText("Create your character to explore the world");
-		playerCreationDialog.getDialogPane().setContent(playerBP);
-		playerCreationDialog.getDialogPane().getButtonTypes().add(acceptButton);
-
-		statGridPane.setPadding(new Insets(5f, 5f, 5f, 5f));
-		skillGridPane.setPadding(new Insets(5f, 5f, 5f, 5f));
-		playerInfoGridPane.setPadding(new Insets(5f, 5f, 5f, 5f));
-
-		Node acceptButtonNde = playerCreationDialog.getDialogPane().lookupButton(acceptButton);
-		acceptButtonNde.setDisable(true);
-
-		Button reRollStats = new Button("Roll");
-		Button reRollSkills = new Button("Roll");
-
-		Label playerNameLbl = new Label("Player Name:");
+		// Dialog Nodes
+		BorderPane dialogRootPane = new BorderPane();
+		ChoiceBox<ActorRace> raceChoiceBox = new ChoiceBox<>();
+		ChoiceBox<CharacterClass> classChoiceBox = new ChoiceBox<>();
 		TextField playerNameField = new TextField();
+		TextArea descriptionArea = new TextArea();
 
-		ChoiceBox<ActorRace> playerRaceBox = new ChoiceBox<>(); // Holds the references of the character
-		ChoiceBox<String> playerClassBox = new ChoiceBox<>(); // Holds the ids of the character classes
+		descriptionArea.setEditable(false);
+		descriptionArea.setWrapText(true);
 
-		Label[] statLbls = new Label[EnumAbility.values().length];
-		IncrementalIntegerField[] statFields = new IncrementalIntegerField[EnumAbility.values().length];
+		raceChoiceBox.setConverter(new ActorRaceStringConverter());
+		raceChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ActorRace>() {
 
-		Label[] skillLbls = new Label[EnumSkill.values().length];
-		IncrementalIntegerField[] skillFields = new IncrementalIntegerField[EnumSkill.values().length];
-
-		reRollStats.setOnAction(e -> {
-			int[] adjustedScore = Utils.generateAbilityScores();
-			for (int i = 0; i < statFields.length; i++)
-				statFields[i].setFieldCount(adjustedScore[i]);
-		});
-
-		reRollSkills.setOnAction(e -> {
-			int[] adjustedScore = Utils.generateSkillScores();
-			for (int i = 0; i < skillFields.length; i++)
-				skillFields[i].setFieldCount(adjustedScore[i]);
-		});
-
-		playerNameField.textProperty().addListener((obs, oV, nV) -> {
-			acceptButtonNde.setDisable(nV.trim().isEmpty());
-		});
-
-		// Add the Actor Races that can be selected from the Registry map here
-		Set<Entry<String, ActorRace>> actorRaceEntrySet = Registry.actorRacesMap.entrySet();
-		Iterator<Entry<String, ActorRace>> actorRaceIterator = actorRaceEntrySet.iterator();
-
-		while (actorRaceIterator.hasNext()) {
-
-			// The Iterator has an entry, we want to pull the value
-			ActorRace dummyRace = actorRaceIterator.next().getValue();
-
-			// Check to see if the race is playable, if so add it to the choice box
-			if (dummyRace.isPlayable()) {
-				playerRaceBox.getItems().add(dummyRace);
-			} else
-				continue;
-
-		}
-
-		// Add all the Character Classes from the registry map to the choice box
-		Set<Entry<String, CharacterClass>> characterClassEntrySet = Registry.characterClassMap.entrySet();
-		Iterator<Entry<String, CharacterClass>> characterClassIterator = characterClassEntrySet.iterator();
-
-		while (characterClassIterator.hasNext()) {
-			playerClassBox.getItems().add(characterClassIterator.next().getKey()); // DEBUG WERE USING KEYS CURRENTLY
-		}
-
-		playerInfoGridPane.add(playerNameLbl, 0, 0);
-		playerInfoGridPane.add(playerNameField, 1, 0);
-		playerInfoGridPane.add(playerRaceBox, 2, 0);
-		playerInfoGridPane.add(playerClassBox, 2, 1);
-
-		int[] abscore = Utils.generateAbilityScores();
-		for (int i = 0; i < statLbls.length; i++) {
-			statLbls[i] = new Label(EnumAbility.values()[i].name());
-			statFields[i] = new IncrementalIntegerField(false);
-
-			statGridPane.add(statLbls[i], 0, i + 1);
-			statGridPane.add(statFields[i], 1, i + 1);
-			statFields[i].setFieldCount(abscore[i]);
-		}
-
-		statGridPane.add(reRollStats, 0, EnumAbility.values().length + 1);
-
-		int[] sscore = Utils.generateSkillScores();
-		for (int i = 0; i < skillLbls.length; i++) {
-			skillLbls[i] = new Label(EnumSkill.values()[i].name());
-			skillFields[i] = new IncrementalIntegerField(false);
-
-			skillGridPane.add(skillLbls[i], 0, i + 1);
-			skillGridPane.add(skillFields[i], 1, i + 1);
-			skillFields[i].setFieldCount(sscore[i]);
-		}
-
-		skillGridPane.add(reRollSkills, 0, EnumSkill.values().length + 1);
-
-		playerBP.setPadding(new Insets(1.5f, 1.5f, 1.5f, 1.5f));
-		playerBP.setTop(playerInfoGridPane);
-		playerBP.setLeft(statGridPane);
-		playerBP.setRight(skillGridPane);
-
-		Platform.runLater(() -> playerNameField.requestFocus());
-		Optional<Player> playerOptional = playerCreationDialog.showAndWait();
-
-		playerCreationDialog.setResultConverter(dialogButton -> {
-
-			if (dialogButton == acceptButton) {
-				// Apply all the data to the player
-				player.setActorRace(playerRaceBox.getValue());
-				player.setActorCharacterClass(Registry.characterClassMap.get(playerClassBox.getValue()));
-
-				// Get the ability scores from the incremental fields
-				int[] scores = new int[statFields.length];
-				for (int i = 0; i < statFields.length; i++)
-					scores[i] = statFields[i].getFieldCount();
-
-				player.setActorAbilityScores(scores);
-
-				int[] skills = new int[skillFields.length];
-				for (int i = 0; i < skillFields.length; i++)
-					skills[i] = skillFields[i].getFieldCount();
-
-				player.setActorSkills(skills);
-
-				return player;
+			@Override
+			public void changed(ObservableValue<? extends ActorRace> observable, ActorRace oldValue,
+					ActorRace newValue) {
+				if (newValue != null) {
+					descriptionArea.clear();
+					descriptionArea.setText(newValue.getActorRaceName() + "\n" + newValue.getActorRaceDesc());
+				}
 			}
 
-			return null;
 		});
 
-		Main.log.debug(playerOptional.get().getActorId());
+		classChoiceBox.setConverter(new CharacterClassStringConverter());
+		classChoiceBox.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+			if (nv != null) {
+				descriptionArea.clear();
+				descriptionArea.setText(nv.getCharacterClassName() + "\n" + nv.getCharacterClassDesc());
+			}
+		});
 
-		return playerOptional.get();
+		Iterator<Entry<String, ActorRace>> raceIterator = Registry.actorRacesMap.entrySet().iterator();
+		while (raceIterator.hasNext()) {
+			ActorRace race = raceIterator.next().getValue();
+			raceChoiceBox.getItems().add(race);
+		}
+
+		Iterator<Entry<String, CharacterClass>> classIterator = Registry.characterClassMap.entrySet().iterator();
+		while (classIterator.hasNext()) {
+			CharacterClass cclass = classIterator.next().getValue();
+			classChoiceBox.getItems().add(cclass);
+		}
+
+		Node createButton = dialog.getDialogPane().lookupButton(createPlayerType);
+		createButton.setDisable(true);
+
+		playerNameField.textProperty().addListener(e -> {
+			createButton.setDisable(playerNameField.getText().isEmpty());
+		});
+
+		HBox hbox = new HBox();
+		hbox.getChildren().addAll(playerNameField, raceChoiceBox, classChoiceBox);
+
+		dialog.setResultConverter(dialogButton -> {
+			Player player = new Player(raceChoiceBox.getValue(), classChoiceBox.getValue());
+			player.setActorName(playerNameField.getText());
+
+			return player;
+		});
+
+		dialogRootPane.setCenter(hbox);
+		dialogRootPane.setBottom(descriptionArea);
+		dialog.getDialogPane().setContent(dialogRootPane);
+		return dialog.showAndWait().get();
 	}
-	*/
+
 	public void setLocation(Location location) {
 		// TODO: Any special Classes that need their location switched when this one is
 		setCurrentLocation(location);
-		dirSwatch.setCurrentLocation(location);
+		dirSwatch.setCurrentLocation(location.getLocationId());
 
 		// Update the GameWorld
 		gameWorld.setCurrentLocation(location);
@@ -271,11 +196,11 @@ public class Anvil extends Application {
 		this.currentLocation = currentLocation;
 	}
 
-	public static void writeToConsole(String message) {
+	public void writeToConsole(String message) {
 		interactionTextArea.appendText(message + "\n");
 	}
 
-	public static void clearConsole() {
+	public void clearConsole() {
 		interactionTextArea.clear();
 	}
 

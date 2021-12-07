@@ -4,7 +4,6 @@ import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 
 import captainsly.Main;
 import captainsly.anvil.mechanics.entities.Actor;
-import captainsly.anvil.ui.Anvil;
 import captainsly.utils.Utils;
 
 public class Potion extends Item {
@@ -28,6 +27,5 @@ public class Potion extends Item {
 	public void onUse(Actor actor) {
 		Main.globals.loadfile(Utils.WORKING_DIRECTORY + "scripts/" + potionScript).call();
 		Main.globals.get("onUse").invoke(CoerceJavaToLua.coerce(actor));
-		Anvil.writeToConsole("Added hp to player");
 	}
 }

@@ -1,4 +1,4 @@
-enumStats = luajava.bindClass(enumStat)
+local enumStats = luajava.bindClass(enumStat)
 
 function onUse(actor)
 	anvilLog(rollDice("1d6+12"))

@@ -22,12 +22,24 @@ import captainsly.anvil.mechanics.enums.EnumSkill;
 public class Utils {
 
 	public static final String WORKING_DIRECTORY = System.getProperty("user.dir") + "/anvil/";
+	public static final String SAVE_DIRECTORY = WORKING_DIRECTORY + "saves/";
+	public static final String SCRIPT_DIRECTORY = WORKING_DIRECTORY + "scripts/";
 
 	public static void createDefaultWorkingDir() {
 		File workingDir = new File(WORKING_DIRECTORY);
 		if (!workingDir.exists()) {
 			workingDir.mkdir();
 		}
+	}
+
+	public static String toNormalCase(String s) {
+		String string_tolower = s.toLowerCase();
+		int length = string_tolower.length();
+
+		String beginning = string_tolower.substring(0, 1).toUpperCase();
+		String half = string_tolower.substring(1, length);
+
+		return beginning + half;
 	}
 
 	public static void serializeObject(Object o, String path) {
@@ -72,6 +84,10 @@ public class Utils {
 		return rolls.getRollResults().iterator();
 	}
 
+	public static int getAbilityModifier(int abilityScore) {
+		return (int) Math.floor((abilityScore - 10) / 2);
+	}
+
 	public static int[] generateAbilityScores() {
 		int[] abilityScores = new int[EnumAbility.values().length];
 		int[] rolls = new int[EnumAbility.values().length];
@@ -105,7 +121,7 @@ public class Utils {
 		abilityScores[3] = 13 + rolls[3] - rolls[4];
 		abilityScores[4] = 13 + rolls[4] - rolls[5];
 		abilityScores[5] = 13 + rolls[5] - rolls[0];
-		
+
 		Random rand = new Random();
 		// Shuffle the ability scores before returning
 		for (int i = 0; i < abilityScores.length; i++) {
@@ -119,7 +135,7 @@ public class Utils {
 	}
 
 	public static int[] generateSkillScores() {
-		int[] abilityScores = new int[EnumSkill.values().length];
+		int[] skillScores = new int[EnumSkill.values().length];
 		int[] rolls = new int[EnumSkill.values().length];
 
 		// Get the Roll Result Iterator
@@ -136,25 +152,25 @@ public class Utils {
 		}
 
 		// Calculate rolls
-		for (int i = 0; i < abilityScores.length; i++) {
+		for (int i = 0; i < skillScores.length; i++) {
 
 			int z = i + 1;
-			if (i <= abilityScores.length)
+			if (i <= skillScores.length)
 				z = 0;
 
-			abilityScores[i] = 13 + rolls[i] - rolls[z];
+			skillScores[i] = 8 + rolls[i] - rolls[z];
 		}
 
 		Random rand = new Random();
 		// Shuffle the ability scores before returning
-		for (int i = 0; i < abilityScores.length; i++) {
-			int randomIndexToSwap = rand.nextInt(abilityScores.length);
-			int temp = abilityScores[randomIndexToSwap];
-			abilityScores[randomIndexToSwap] = abilityScores[i];
-			abilityScores[i] = temp;
+		for (int i = 0; i < skillScores.length; i++) {
+			int randomIndexToSwap = rand.nextInt(skillScores.length);
+			int temp = skillScores[randomIndexToSwap];
+			skillScores[randomIndexToSwap] = skillScores[i];
+			skillScores[i] = temp;
 		}
 
-		return abilityScores;
+		return skillScores;
 	}
 
 }

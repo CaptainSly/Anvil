@@ -1,15 +1,40 @@
 package captainsly.anvil.mechanics.events;
 
-import java.io.File;
+import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.lib.jse.CoerceJavaToLua;
+
+import captainsly.Main;
+import captainsly.anvil.mechanics.entities.Actor;
 
 public class GameEvent {
 
 	private String gameEventId;
-	private File gameEventScript;
+	private String gameEventScript;
 
-	public GameEvent(String gameEventId, String gameEventScript) {
-		this.gameEventId = gameEventId;
-		this.gameEventScript = new File(gameEventScript);
+	private String gameEventName;
+
+	public GameEvent(String gameEventScript) {
+		this.gameEventScript = gameEventScript;
+
+		// Setup game event name and id
+		
+		System.out.println("GameEventScript: " + gameEventScript);
+		Main.globals.loadfile(gameEventScript).call();
+		LuaValue getEventName = Main.globals.get("getEventName").call();
+		LuaValue getEventId = Main.globals.get("getEventId").call();
+		gameEventId = getEventId.tojstring();
+		gameEventName = getEventName.tojstring();
+
+	}
+
+	public void onActivate(Actor actor) {
+		Main.globals.loadfile(gameEventScript).call();
+		Main.globals.get("onActivate").call(CoerceJavaToLua.coerce(actor));
+
+	}
+
+	public String getGameEventName() {
+		return gameEventName;
 	}
 
 	public String getGameEventId() {
@@ -18,14 +43,6 @@ public class GameEvent {
 
 	public void setGameEventId(String gameEventId) {
 		this.gameEventId = gameEventId;
-	}
-
-	public File getGameEventScript() {
-		return gameEventScript;
-	}
-
-	public void setGameEventScript(File gameEventScript) {
-		this.gameEventScript = gameEventScript;
 	}
 
 }

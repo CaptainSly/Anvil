@@ -3,7 +3,7 @@ package captainsly.anvil.mechanics.enums;
 public enum EnumDirection {
 
 	NORTH, SOUTH, EAST, WEST;
-	
+
 	public EnumDirection opposite() {
 		switch (this) {
 		case NORTH:
@@ -18,5 +18,14 @@ public enum EnumDirection {
 			return NORTH;
 		}
 	}
-	
+
+
+	public static EnumDirection getDirectionFromString(String direction) {
+		for (EnumDirection d : values())
+			if (d.name().toLowerCase().equals(direction.toLowerCase()))
+				return d;
+
+		return null;
+	}
+
 }

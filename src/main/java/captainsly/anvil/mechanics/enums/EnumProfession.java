@@ -2,6 +2,14 @@ package captainsly.anvil.mechanics.enums;
 
 public enum EnumProfession {
 
-	//TODO: Fill out this Enumeration
-	
+	;
+
+	public static EnumProfession getProfessionFromString(String profession) {
+		for (EnumProfession enumProfession : values())
+			if (enumProfession.name().equalsIgnoreCase(profession))
+				return enumProfession;
+
+		return null;
+	}
+
 }

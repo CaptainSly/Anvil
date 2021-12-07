@@ -4,6 +4,7 @@ import org.luaj.vm2.Globals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import captainsly.anvil.core.Registry;
 import captainsly.anvil.core.scripting.AnvilPlatform;
 import captainsly.anvil.ui.Anvil;
 import captainsly.hammer.Hammer;
@@ -15,7 +16,6 @@ public class Main {
 	public static final String APPLICATION_VERSION = "0.0.1B";
 
 	public static final Logger log = LoggerFactory.getLogger("[MAIN]");
-
 	public static Globals globals;
 
 	public static void main(String[] args) {
@@ -24,34 +24,42 @@ public class Main {
 		// -h Shows this help text
 		// -s, --argument Switches the Application that is launched on startup, Options
 		// are Hammer or Anvil
+		// -v, --version Shows the version of the application
 
 		if (args.length >= 1) {
 			// Find out which tag is being used in the arguments.
 			switch (args[0]) {
-			case "-h":
-				// The Help Tag, Prints out help information
-				log.info("HELP");
-				printHelpInfo();
-				System.exit(-1);
-				break;
-			case "-s":
+				case "-h":
+					// The Help Tag, Prints out help information
+					log.info("HELP");
+					printHelpInfo();
+					System.exit(-1);
+					break;
+				case "-s":
 
-				log.info("Switch mode. Argument: " + args[1]);
-				log.info("Checking to see if the working directory exists");
+					log.info("Switch mode. Argument: " + args[1]);
+					log.info("Checking to see if the working directory exists");
 
-				if (!Utils.doesWorkingDirExist())
-					Utils.createDefaultWorkingDir();
+					if (!Utils.doesWorkingDirExist())
+						Utils.createDefaultWorkingDir();
 
-				log.info("Creating LuaJ globals with the AnvilPlatform Globals");
-				globals = AnvilPlatform.standardGlobals();
+					log.info("Creating LuaJ globals with the AnvilPlatform Globals");
+					globals = AnvilPlatform.standardGlobals();
 
-				// The Switch Tag, allows you to switch between anvil or hammer.
-				switchApplication(args[1], args);
-				break;
-			default:
-				printHelpInfo();
-				System.exit(-1);
-				break;
+					// Registry Stuff
+					Registry.register();
+
+					// The Switch Tag, allows you to switch between anvil or hammer.
+					switchApplication(args[1], args);
+					break;
+				case "-v":
+					// The Version Tag, Prints out the version of the application
+					log.info("Version: " + APPLICATION_VERSION);
+					break;
+				default:
+					printHelpInfo();
+					System.exit(-1);
+					break;
 			}
 		} else {
 			printHelpInfo();

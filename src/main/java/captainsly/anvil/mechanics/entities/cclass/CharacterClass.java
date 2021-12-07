@@ -1,5 +1,6 @@
 package captainsly.anvil.mechanics.entities.cclass;
 
+import captainsly.anvil.mechanics.enums.EnumAbility;
 import captainsly.anvil.mechanics.enums.EnumSkill;
 
 public class CharacterClass {
@@ -10,14 +11,16 @@ public class CharacterClass {
 	private String characterClassName;
 	private String characterClassDesc;
 
-	private int[] characterClassBonuses;
+	private int[] characterClassSkillBonuses;
+	private int[] characterClassAbilityBonuses;
 
 	public CharacterClass(String characterClassId, String characterClassName, String characterClassDesc) {
 		this.characterClassId = characterClassId;
 		this.characterClassName = characterClassName;
 		this.characterClassDesc = characterClassDesc;
 
-		characterClassBonuses = new int[EnumSkill.values().length];
+		characterClassAbilityBonuses = new int[EnumAbility.values().length];
+		characterClassSkillBonuses = new int[EnumSkill.values().length];
 	}
 
 	/**
@@ -26,14 +29,12 @@ public class CharacterClass {
 	 * @param stat   The Stat to modify
 	 * @param amount - The amount from 1 to 5
 	 */
-	public void modifyCharacterClassBonuses(EnumSkill skill, int amount) {
-		if (amount >= 5)
-			amount = 5;
-
-		if (amount <= -5)
-			amount = -5;
-
-		characterClassBonuses[skill.ordinal()] += amount;
+	public void modifyCharacterClassAbilityBonuses(EnumAbility ability, int amount) {
+		characterClassSkillBonuses[ability.ordinal()] += amount;
+	}
+	
+	public void modifyCharacterClassSkillBonuses(EnumSkill skill, int amount) {
+		characterClassSkillBonuses[skill.ordinal()] += amount;
 	}
 
 	public String getCharacterClassId() {
@@ -48,12 +49,12 @@ public class CharacterClass {
 		return characterClassDesc;
 	}
 
-	public int getCharacterClassSkillBonus(EnumSkill skill) {
-		return characterClassBonuses[skill.ordinal()];
+	public int[] getCharacterClassAbilityBonuses() {
+		return characterClassAbilityBonuses;
 	}
-
+	
 	public int[] getCharacterClassSkillBonuses() {
-		return characterClassBonuses;
+		return characterClassSkillBonuses;
 	}
 
 }

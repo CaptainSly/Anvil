@@ -9,11 +9,12 @@ import captainsly.anvil.mechanics.container.EquipmentSlot;
 import captainsly.anvil.mechanics.container.Inventory;
 import captainsly.anvil.mechanics.entities.actrace.ActorRace;
 import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
+import captainsly.anvil.mechanics.enums.EnumAbility;
 import captainsly.anvil.mechanics.enums.EnumEquipmentSlotType;
 import captainsly.anvil.mechanics.enums.EnumSkill;
-import captainsly.anvil.mechanics.enums.EnumAbility;
 import captainsly.anvil.mechanics.factions.Faction;
 import captainsly.anvil.mechanics.items.equipment.Equipment;
+import captainsly.utils.Utils;
 
 public abstract class Actor implements Serializable {
 
@@ -30,7 +31,6 @@ public abstract class Actor implements Serializable {
 
 	private int[] actorAbilityScores;
 	private int[] actorSkills, actorSkillsXp;
-	private int actorArmorClass;
 
 	// Equipment and Inventory
 	private final Inventory actorInventory;
@@ -53,11 +53,10 @@ public abstract class Actor implements Serializable {
 
 		// Add The Actor's Racial Bonus to their stats and Skill Bonuses
 		for (int i = 0; i < actorAbilityScores.length; i++) {
-			actorAbilityScores[i] += actorRace.getActorRaceBenefits()[i];
+			actorAbilityScores[i] += actorRace.getActorRaceBenefitsAbility()[i];
 			actorSkills[i] += actorCharacterClass.getCharacterClassSkillBonuses()[i];
+			actorSkills[i] += actorRace.getActorRaceBenefitsSkill()[i];
 		}
-
-		actorArmorClass = 10 + getAbilityModifier(getActorAbilityScore(EnumAbility.DEXTERITY));
 
 		// Setup Equipment Slots
 		amuletEquipmentSlots = new EquipmentSlot[5]; // Does your chain hang low?
@@ -76,14 +75,6 @@ public abstract class Actor implements Serializable {
 
 	}
 
-	public int getAbilityModifier(int abilityScore) {
-		return (int) Math.floor((abilityScore - 10) / 2);
-	}
-
-	public void modifyArmorClass(int amount) {
-		actorArmorClass += amount;
-	}
-
 	public void modifyActorAbilityScore(EnumAbility stat, int amount) {
 		actorAbilityScores[stat.ordinal()] += amount;
 	}
@@ -98,40 +89,40 @@ public abstract class Actor implements Serializable {
 
 	public void equipEquipment(Equipment equipment) {
 		switch (equipment.getEquipSlotType()) {
-		case NECK:
-			Main.log.debug("Equiping a neck type item");
+			case NECK:
+				Main.log.debug("Equiping a neck type item");
 
-			// Find the first empty slot inside the neckEquipment array
-			for (EquipmentSlot slot : amuletEquipmentSlots) {
-				if (slot != null && slot.isEmpty()) // None of the slots should equal null, but just in case
-					slot.addEquipment(equipment);
-				else
-					continue;
-			}
+				// Find the first empty slot inside the neckEquipment array
+				for (EquipmentSlot slot : amuletEquipmentSlots) {
+					if (slot != null && slot.isEmpty()) // None of the slots should equal null, but just in case
+						slot.addEquipment(equipment);
+					else
+						continue;
+				}
 
-			break;
-		case RINGS:
-			Main.log.debug("Equiping a ring type item");
+				break;
+			case RINGS:
+				Main.log.debug("Equiping a ring type item");
 
-			// Find the first empty slot inside the ringEquipment array
-			for (EquipmentSlot slot : ringEquipmentSlots) {
-				if (slot != null && slot.isEmpty())
-					slot.addEquipment(equipment);
-				else
-					continue;
-			}
+				// Find the first empty slot inside the ringEquipment array
+				for (EquipmentSlot slot : ringEquipmentSlots) {
+					if (slot != null && slot.isEmpty())
+						slot.addEquipment(equipment);
+					else
+						continue;
+				}
 
-			break;
-		default:
-			Main.log.debug("Equipping to slot type: " + equipment.getEquipSlotType());
-			EquipmentSlot s = armorEquipmentSlots[equipment.getEquipSlotType().ordinal()];
+				break;
+			default:
+				Main.log.debug("Equipping to slot type: " + equipment.getEquipSlotType());
+				EquipmentSlot s = armorEquipmentSlots[equipment.getEquipSlotType().ordinal()];
 
-			if (s.isEmpty())
-				s.addEquipment(equipment);
-			else {
-				replaceSlot(s, equipment);
-			}
-			break;
+				if (s.isEmpty())
+					s.addEquipment(equipment);
+				else {
+					replaceSlot(s, equipment);
+				}
+				break;
 
 		}
 
@@ -153,7 +144,7 @@ public abstract class Actor implements Serializable {
 		slot.getSlotEquipment().onUnequip(this);
 		slot.removeEquipment();
 	}
-	
+
 	public void setActorName(String actorName) {
 		this.actorName = actorName;
 	}
@@ -191,7 +182,7 @@ public abstract class Actor implements Serializable {
 	}
 
 	public int getActorArmorClass() {
-		return actorArmorClass;
+		return 10 + Utils.getAbilityModifier(getActorAbilityScore(EnumAbility.DEXTERITY));
 	}
 
 	public int getActorTotalLevel() {

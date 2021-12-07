@@ -1,5 +1,6 @@
 package captainsly.anvil.ui.nodes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -22,6 +23,13 @@ public class InventoryView extends Region {
 
 	public InventoryView(Player player) {
 		this.player = player;
-	}
+		rootFlowPane = new FlowPane();
+		itemSlotBtnList = new ArrayList<>();
 
+		
+
+
+		
+	}
+	
 }

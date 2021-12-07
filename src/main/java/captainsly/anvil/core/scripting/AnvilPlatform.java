@@ -3,15 +3,14 @@ package captainsly.anvil.core.scripting;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LoadState;
 import org.luaj.vm2.compiler.LuaC;
+import org.luaj.vm2.lib.BaseLib;
 import org.luaj.vm2.lib.Bit32Lib;
 import org.luaj.vm2.lib.CoroutineLib;
 import org.luaj.vm2.lib.PackageLib;
 import org.luaj.vm2.lib.StringLib;
 import org.luaj.vm2.lib.TableLib;
-import org.luaj.vm2.lib.jse.JseBaseLib;
 import org.luaj.vm2.lib.jse.JseIoLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
-import org.luaj.vm2.lib.jse.JseOsLib;
 import org.luaj.vm2.lib.jse.LuajavaLib;
 
 public class AnvilPlatform {
@@ -44,7 +43,6 @@ public class AnvilPlatform {
 	 */
 	public static Globals standardGlobals() {
 		Globals globals = new Globals();
-		globals.load(new JseBaseLib());
 		globals.load(new PackageLib());
 		globals.load(new Bit32Lib());
 		globals.load(new TableLib());
@@ -52,9 +50,9 @@ public class AnvilPlatform {
 		globals.load(new CoroutineLib());
 		globals.load(new JseMathLib());
 		globals.load(new JseIoLib());
-		globals.load(new JseOsLib());
 		globals.load(new LuajavaLib());
-		globals.load(new AnvilLib());
+		globals.load(new BaseLib());
+		globals.load(new AnvilBaseLib());
 		LoadState.install(globals);
 		LuaC.install(globals);
 		return globals;
