@@ -11,10 +11,7 @@ import captainsly.anvil.mechanics.objBuilders.ActorRaceBuilder.ActorRaceStringCo
 import captainsly.anvil.mechanics.objBuilders.CharacterClassBuilder.CharacterClassStringConverter;
 import captainsly.anvil.mechanics.player.Player;
 import captainsly.anvil.mechanics.world.GameWorld;
-import captainsly.anvil.ui.nodes.DirectionSwatch;
-import captainsly.anvil.ui.nodes.EquipmentSwatch;
-import captainsly.anvil.ui.nodes.InventoryView;
-import captainsly.anvil.ui.nodes.PlayerStatsView;
+import captainsly.anvil.ui.nodes.*;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -38,182 +35,192 @@ import javafx.stage.Stage;
 
 public class Anvil extends Application {
 
-	// UI Nodes and Layout
-	private AnchorPane anchorPane;
-	private BorderPane rootBP, controlBP;
-	private HBox menuHBox;
-	private VBox playerOptionsVBox;
+    // UI Nodes and Layout
+    private AnchorPane anchorPane;
+    private BorderPane rootBP, controlBP;
+    private HBox menuHBox;
+    private VBox locationNodesVBox;
+    private VBox playerOptionsVBox;
 
-	private DirectionSwatch dirSwatch;
-	private EquipmentSwatch equipmentSwatch;
-	private InventoryView inventoryView;
-	private TextArea interactionTextArea;
-	private PlayerStatsView playerStatView;
-	private Location currentLocation;
+    private DirectionSwatch dirSwatch;
+    private EquipmentSwatch equipmentSwatch;
+    private InventoryView inventoryView;
+    private TextArea interactionTextArea;
+    private PlayerStatsView playerStatView;
+    private LocationActorView locationActorView;
+    private Location currentLocation;
 
-	private GameWorld gameWorld;
+    private GameWorld gameWorld;
 
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		anchorPane = new AnchorPane();
-		rootBP = new BorderPane();
-		controlBP = new BorderPane();
-		menuHBox = new HBox();
-		playerOptionsVBox = new VBox();
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        anchorPane = new AnchorPane();
+        rootBP = new BorderPane();
+        controlBP = new BorderPane();
+        menuHBox = new HBox();
+        playerOptionsVBox = new VBox();
 
-		currentLocation = Registry.locationsMap.get("locationCalinfor");
+        currentLocation = Registry.locationsMap.get("locationCalinfor");
 
-		interactionTextArea = new TextArea();
-		interactionTextArea.setWrapText(true);
-		interactionTextArea.setEditable(false);
+        interactionTextArea = new TextArea();
+        interactionTextArea.setWrapText(true);
+        interactionTextArea.setEditable(false);
 //		interactionTextArea.setStyle("-fx-font-size: 18");
 
-		// Show the creation dialog, then create the gameworld
-		// TODO: Fix player creation
+        Player player = createPlayer();
 
-		Player player = createPlayer();
-		
-		gameWorld = new GameWorld(this, player);
+        gameWorld = new GameWorld(this, player);
 
-		inventoryView = new InventoryView(player);
-		equipmentSwatch = new EquipmentSwatch(player);
-		playerStatView = new PlayerStatsView(player);
-		dirSwatch = new DirectionSwatch(this);
 
-		setLocation(currentLocation);
+        inventoryView = new InventoryView(player);
+        equipmentSwatch = new EquipmentSwatch(player);
+        playerStatView = new PlayerStatsView(player);
 
-		menuHBox.getChildren().addAll();
+        locationActorView = new LocationActorView(this, currentLocation);
+        dirSwatch = new DirectionSwatch(this);
 
-		Separator sep = new Separator(Orientation.HORIZONTAL);
-		sep.setPadding(new Insets(1.5f, 0f, 1.5f, 0f));
+        setLocation(currentLocation);
 
-		playerOptionsVBox.setPadding(new Insets(5, 5, 5, 5));
-		playerOptionsVBox.getChildren().addAll(playerStatView, equipmentSwatch, sep, dirSwatch, inventoryView);
+        menuHBox.getChildren().addAll();
 
-		controlBP.setLeft(playerOptionsVBox);
+        Separator sep = new Separator(Orientation.HORIZONTAL);
+        sep.setPadding(new Insets(1.5f, 0f, 1.5f, 0f));
 
-		rootBP.setTop(menuHBox);
-		rootBP.setLeft(controlBP);
-		rootBP.setCenter(interactionTextArea);
+        playerOptionsVBox.setPadding(new Insets(5, 5, 5, 5));
+        playerOptionsVBox.getChildren().addAll(playerStatView, equipmentSwatch, sep, dirSwatch, inventoryView);
 
-		anchorPane.getChildren().add(rootBP);
+        locationNodesVBox = new VBox();
+        locationNodesVBox.setPadding(new Insets(5, 5, 5, 5));
+        locationNodesVBox.getChildren().addAll(locationActorView);
 
-		AnchorPane.setTopAnchor(rootBP, 5.0d);
-		AnchorPane.setLeftAnchor(rootBP, 5.0d);
-		AnchorPane.setBottomAnchor(rootBP, 5.0d);
-		AnchorPane.setRightAnchor(rootBP, 5.0d);
+        controlBP.setLeft(playerOptionsVBox);
 
-		Scene scene = new Scene(anchorPane, 640, 480);
-		primaryStage.getIcons().add(new Image("anvillogo.png"));
-		primaryStage.setTitle("Anvil");
-		primaryStage.setScene(scene);
-		primaryStage.show();
-	}
+        rootBP.setTop(menuHBox);
+        rootBP.setLeft(controlBP);
+        rootBP.setRight(locationNodesVBox);
+        rootBP.setCenter(interactionTextArea);
 
-	private Player createPlayer() {
-		Dialog<Player> dialog = new Dialog<>();
-		ButtonType createPlayerType = new ButtonType("Create Player", ButtonData.OK_DONE);
-		dialog.getDialogPane().getButtonTypes().add(createPlayerType);
+        anchorPane.getChildren().add(rootBP);
 
-		// Dialog Nodes
-		BorderPane dialogRootPane = new BorderPane();
-		ChoiceBox<ActorRace> raceChoiceBox = new ChoiceBox<>();
-		ChoiceBox<CharacterClass> classChoiceBox = new ChoiceBox<>();
-		TextField playerNameField = new TextField();
-		TextArea descriptionArea = new TextArea();
+        AnchorPane.setTopAnchor(rootBP, 5.0d);
+        AnchorPane.setLeftAnchor(rootBP, 5.0d);
+        AnchorPane.setBottomAnchor(rootBP, 5.0d);
+        AnchorPane.setRightAnchor(rootBP, 5.0d);
 
-		descriptionArea.setEditable(false);
-		descriptionArea.setWrapText(true);
+        Scene scene = new Scene(anchorPane, 1280, 720);
+        primaryStage.getIcons().add(new Image("anvillogo.png"));
+        primaryStage.setTitle("Anvil");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
 
-		raceChoiceBox.setConverter(new ActorRaceStringConverter());
-		raceChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ActorRace>() {
+    private Player createPlayer() {
+        Dialog<Player> dialog = new Dialog<>();
+        ButtonType createPlayerType = new ButtonType("Create Player", ButtonData.OK_DONE);
+        dialog.setTitle("Create Player");
+        dialog.setHeaderText("Pick your character class and race, and choose a name");
+        dialog.getDialogPane().getButtonTypes().add(createPlayerType);
 
-			@Override
-			public void changed(ObservableValue<? extends ActorRace> observable, ActorRace oldValue,
-					ActorRace newValue) {
-				if (newValue != null) {
-					descriptionArea.clear();
-					descriptionArea.setText(newValue.getActorRaceName() + "\n" + newValue.getActorRaceDesc());
-				}
-			}
+        // Dialog Nodes
+        BorderPane dialogRootPane = new BorderPane();
+        ChoiceBox<ActorRace> raceChoiceBox = new ChoiceBox<>();
+        ChoiceBox<CharacterClass> classChoiceBox = new ChoiceBox<>();
+        TextField playerNameField = new TextField();
+        TextArea descriptionArea = new TextArea();
 
-		});
+        descriptionArea.setEditable(false);
+        descriptionArea.setWrapText(true);
 
-		classChoiceBox.setConverter(new CharacterClassStringConverter());
-		classChoiceBox.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
-			if (nv != null) {
-				descriptionArea.clear();
-				descriptionArea.setText(nv.getCharacterClassName() + "\n" + nv.getCharacterClassDesc());
-			}
-		});
+        raceChoiceBox.setConverter(new ActorRaceStringConverter());
+        raceChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ActorRace>() {
 
-		Iterator<Entry<String, ActorRace>> raceIterator = Registry.actorRacesMap.entrySet().iterator();
-		while (raceIterator.hasNext()) {
-			ActorRace race = raceIterator.next().getValue();
-			raceChoiceBox.getItems().add(race);
-		}
+            @Override
+            public void changed(ObservableValue<? extends ActorRace> observable, ActorRace oldValue,
+                                ActorRace newValue) {
+                if (newValue != null) {
+                    descriptionArea.clear();
+                    descriptionArea.setText(newValue.getActorRaceName() + "\n" + newValue.getActorRaceDesc());
+                }
+            }
 
-		Iterator<Entry<String, CharacterClass>> classIterator = Registry.characterClassMap.entrySet().iterator();
-		while (classIterator.hasNext()) {
-			CharacterClass cclass = classIterator.next().getValue();
-			classChoiceBox.getItems().add(cclass);
-		}
+        });
 
-		Node createButton = dialog.getDialogPane().lookupButton(createPlayerType);
-		createButton.setDisable(true);
+        classChoiceBox.setConverter(new CharacterClassStringConverter());
+        classChoiceBox.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+            if (nv != null) {
+                descriptionArea.clear();
+                descriptionArea.setText(nv.getCharacterClassName() + "\n" + nv.getCharacterClassDesc());
+            }
+        });
 
-		playerNameField.textProperty().addListener(e -> {
-			createButton.setDisable(playerNameField.getText().isEmpty());
-		});
+        Iterator<Entry<String, ActorRace>> raceIterator = Registry.actorRacesMap.entrySet().iterator();
+        while (raceIterator.hasNext()) {
+            ActorRace race = raceIterator.next().getValue();
+            raceChoiceBox.getItems().add(race);
+        }
 
-		HBox hbox = new HBox();
-		hbox.getChildren().addAll(playerNameField, raceChoiceBox, classChoiceBox);
+        Iterator<Entry<String, CharacterClass>> classIterator = Registry.characterClassMap.entrySet().iterator();
+        while (classIterator.hasNext()) {
+            CharacterClass cclass = classIterator.next().getValue();
+            classChoiceBox.getItems().add(cclass);
+        }
 
-		dialog.setResultConverter(dialogButton -> {
-			Player player = new Player(raceChoiceBox.getValue(), classChoiceBox.getValue());
-			player.setActorName(playerNameField.getText());
+        Node createButton = dialog.getDialogPane().lookupButton(createPlayerType);
+        createButton.setDisable(true);
 
-			return player;
-		});
+        playerNameField.textProperty().addListener(e -> {
+            createButton.setDisable(playerNameField.getText().isEmpty());
+        });
 
-		dialogRootPane.setCenter(hbox);
-		dialogRootPane.setBottom(descriptionArea);
-		dialog.getDialogPane().setContent(dialogRootPane);
-		return dialog.showAndWait().get();
-	}
+        HBox hbox = new HBox();
+        hbox.getChildren().addAll(playerNameField, raceChoiceBox, classChoiceBox);
 
-	public void setLocation(Location location) {
-		// TODO: Any special Classes that need their location switched when this one is
-		setCurrentLocation(location);
-		dirSwatch.setCurrentLocation(location.getLocationId());
+        dialog.setResultConverter(dialogButton -> {
+            Player player = new Player(raceChoiceBox.getValue(), classChoiceBox.getValue());
+            player.setActorName(playerNameField.getText());
 
-		// Update the GameWorld
-		gameWorld.setCurrentLocation(location);
-		gameWorld.updateView();
-	}
+            return player;
+        });
 
-	public void setCurrentLocation(Location currentLocation) {
-		this.currentLocation = currentLocation;
-	}
+        dialogRootPane.setCenter(hbox);
+        dialogRootPane.setBottom(descriptionArea);
+        dialog.getDialogPane().setContent(dialogRootPane);
+        return dialog.showAndWait().get();
+    }
 
-	public void writeToConsole(String message) {
-		interactionTextArea.appendText(message + "\n");
-	}
+    public void setLocation(Location location) {
+        // TODO: Any special Classes that need their location switched when this one is
+        setCurrentLocation(location);
+        dirSwatch.setCurrentLocation(location.getLocationId());
+        locationActorView.updateLocation(location);
 
-	public void clearConsole() {
-		interactionTextArea.clear();
-	}
+        // Update the GameWorld
+        gameWorld.setCurrentLocation(location);
+        gameWorld.updateView();
+    }
 
-	public Location getCurrentLocation() {
-		return currentLocation;
-	}
+    public void setCurrentLocation(Location currentLocation) {
+        this.currentLocation = currentLocation;
+    }
 
-	public GameWorld getGameWorld() {
-		return gameWorld;
-	}
+    public void writeToConsole(String message) {
+        interactionTextArea.appendText(message + "\n");
+    }
 
-	public TextArea getConsole() {
-		return interactionTextArea;
-	}
+    public void clearConsole() {
+        interactionTextArea.clear();
+    }
+
+    public Location getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public GameWorld getGameWorld() {
+        return gameWorld;
+    }
+
+    public TextArea getConsole() {
+        return interactionTextArea;
+    }
 
 }

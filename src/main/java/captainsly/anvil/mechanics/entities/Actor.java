@@ -1,9 +1,5 @@
 package captainsly.anvil.mechanics.entities;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import captainsly.Main;
 import captainsly.anvil.mechanics.container.EquipmentSlot;
 import captainsly.anvil.mechanics.container.Inventory;
@@ -14,228 +10,302 @@ import captainsly.anvil.mechanics.enums.EnumEquipmentSlotType;
 import captainsly.anvil.mechanics.enums.EnumSkill;
 import captainsly.anvil.mechanics.factions.Faction;
 import captainsly.anvil.mechanics.items.equipment.Equipment;
+import captainsly.anvil.mechanics.magic.Spell;
 import captainsly.utils.Utils;
 
-public abstract class Actor implements Serializable {
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-	private static final long serialVersionUID = -1976893973670890905L;
+public class Actor implements Serializable {
 
-	protected final String actorId; // Actor's UUID
+    private static final long serialVersionUID = -1976893973670890905L;
 
-	protected String actorName;
+    protected final String actorId; // Actor's UUID
 
-	private final List<Faction> actorFactionList;
+    protected String actorName;
+    protected String actorDescription;
 
-	private ActorRace actorRace;
-	private CharacterClass actorCharacterClass;
+    private List<Faction> actorFactionList;
 
-	private int[] actorAbilityScores;
-	private int[] actorSkills, actorSkillsXp;
+    private ActorRace actorRace;
+    private CharacterClass actorCharacterClass;
 
-	// Equipment and Inventory
-	private final Inventory actorInventory;
+    // Stats
+    private int[] actorAbilityScores;
+    private int[] actorSkills;
 
-	private EquipmentSlot[] armorEquipmentSlots;
-	private EquipmentSlot[] ringEquipmentSlots;
-	private EquipmentSlot[] amuletEquipmentSlots;
+    private int actorCurrentHealth, actorMaxHealth, actorCurrentMana, actorMaxMana;
+    private int actorLevel, actorExperience;
 
-	public Actor(String actorId, ActorRace actorRace, CharacterClass actorCharacterClass) {
-		this.actorId = actorId;
-		this.actorRace = actorRace;
-		this.actorCharacterClass = actorCharacterClass;
+    // Equipment and Inventory
+    private Inventory actorInventory;
 
-		actorInventory = new Inventory();
-		actorFactionList = new ArrayList<>();
+    private EquipmentSlot[] armorEquipmentSlots;
+    private EquipmentSlot[] ringEquipmentSlots;
+    private EquipmentSlot[] amuletEquipmentSlots;
 
-		actorAbilityScores = new int[EnumAbility.values().length];
-		actorSkills = new int[EnumSkill.values().length];
-		actorSkillsXp = new int[EnumSkill.values().length];
+    private List<Spell> actorSpellList;
 
-		// Add The Actor's Racial Bonus to their stats and Skill Bonuses
-		for (int i = 0; i < actorAbilityScores.length; i++) {
-			actorAbilityScores[i] += actorRace.getActorRaceBenefitsAbility()[i];
-			actorSkills[i] += actorCharacterClass.getCharacterClassSkillBonuses()[i];
-			actorSkills[i] += actorRace.getActorRaceBenefitsSkill()[i];
-		}
+    public Actor(String actorId, ActorRace actorRace, CharacterClass actorCharacterClass) {
+        this.actorId = actorId;
+        this.actorRace = actorRace;
+        this.actorCharacterClass = actorCharacterClass;
 
-		// Setup Equipment Slots
-		amuletEquipmentSlots = new EquipmentSlot[5]; // Does your chain hang low?
-		ringEquipmentSlots = new EquipmentSlot[10]; // There is ten fingers
-		armorEquipmentSlots = new EquipmentSlot[EnumEquipmentSlotType.values().length - 2];
+        actorInventory = new Inventory();
+        actorFactionList = new ArrayList<>();
+        actorSpellList = new ArrayList<>();
 
-		// Create Equipment Slots
-		for (int i = 0; i < armorEquipmentSlots.length; i++)
-			armorEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.values()[i]);
+        // Instantiate the actor's skills, abilitity scores and health and mana
 
-		for (int i = 0; i < ringEquipmentSlots.length; i++)
-			ringEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.RINGS);
+        actorAbilityScores = new int[EnumAbility.values().length];
+        actorSkills = new int[EnumSkill.values().length];
 
-		for (int i = 0; i < amuletEquipmentSlots.length; i++)
-			amuletEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.NECK);
+        // Add The Actor's Racial Bonus to their stats and Skill Bonuses
+        for (int i = 0; i < actorAbilityScores.length; i++) {
+            actorAbilityScores[i] += actorRace.getActorRaceBenefitsAbility()[i];
+            actorSkills[i] += actorCharacterClass.getCharacterClassSkillBonuses()[i];
+            actorSkills[i] += actorRace.getActorRaceBenefitsSkill()[i];
+        }
 
-	}
+        actorExperience = 0;
 
-	public void modifyActorAbilityScore(EnumAbility stat, int amount) {
-		actorAbilityScores[stat.ordinal()] += amount;
-	}
+        actorCurrentHealth = actorMaxHealth = getActorMaxHealth();
+        actorCurrentMana = actorMaxMana = getActorMaxMana();
 
-	public void modifyActorSkill(EnumSkill skill, int amount) {
-		actorSkills[skill.ordinal()] += amount;
-	}
+        // Setup Equipment Slots
+        amuletEquipmentSlots = new EquipmentSlot[5]; // Does your chain hang low?
+        ringEquipmentSlots = new EquipmentSlot[10]; // There is ten fingers
+        armorEquipmentSlots = new EquipmentSlot[EnumEquipmentSlotType.values().length - 2];
 
-	public void modifyActorSkillXp(EnumSkill skill, int amount) {
-		actorSkillsXp[skill.ordinal()] += amount;
-	}
+        // Create Equipment Slots
+        for (int i = 0; i < armorEquipmentSlots.length; i++)
+            armorEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.values()[i]);
 
-	public void equipEquipment(Equipment equipment) {
-		switch (equipment.getEquipSlotType()) {
-			case NECK:
-				Main.log.debug("Equiping a neck type item");
+        for (int i = 0; i < ringEquipmentSlots.length; i++)
+            ringEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.RINGS);
 
-				// Find the first empty slot inside the neckEquipment array
-				for (EquipmentSlot slot : amuletEquipmentSlots) {
-					if (slot != null && slot.isEmpty()) // None of the slots should equal null, but just in case
-						slot.addEquipment(equipment);
-					else
-						continue;
-				}
+        for (int i = 0; i < amuletEquipmentSlots.length; i++)
+            amuletEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.NECK);
 
-				break;
-			case RINGS:
-				Main.log.debug("Equiping a ring type item");
+    }
 
-				// Find the first empty slot inside the ringEquipment array
-				for (EquipmentSlot slot : ringEquipmentSlots) {
-					if (slot != null && slot.isEmpty())
-						slot.addEquipment(equipment);
-					else
-						continue;
-				}
+    public void modifyActorAbilityScore(EnumAbility stat, int amount) {
+        actorAbilityScores[stat.ordinal()] += amount;
+    }
 
-				break;
-			default:
-				Main.log.debug("Equipping to slot type: " + equipment.getEquipSlotType());
-				EquipmentSlot s = armorEquipmentSlots[equipment.getEquipSlotType().ordinal()];
+    public void modifyActorSkill(EnumSkill skill, int amount) {
+        actorSkills[skill.ordinal()] += amount;
+    }
 
-				if (s.isEmpty())
-					s.addEquipment(equipment);
-				else {
-					replaceSlot(s, equipment);
-				}
-				break;
+    public void equipEquipment(Equipment equipment) {
+        switch (equipment.getEquipSlotType()) {
+            case NECK:
+                Main.log.debug("Equiping a neck type item");
 
-		}
+                // Find the first empty slot inside the neckEquipment array
+                for (EquipmentSlot slot : amuletEquipmentSlots) {
+                    if (slot != null && slot.isEmpty()) // None of the slots should equal null, but just in case
+                        slot.addEquipment(equipment);
+                    else
+                        continue;
+                }
 
-		equipment.onEquip(this);
-	}
+                break;
+            case RINGS:
+                Main.log.debug("Equiping a ring type item");
 
-	private void replaceSlot(EquipmentSlot slot, Equipment equipment) {
-		// Unequip and remove the current equipment from the slot
-		slot.getSlotEquipment().onUnequip(this);
-		slot.removeEquipment();
+                // Find the first empty slot inside the ringEquipment array
+                for (EquipmentSlot slot : ringEquipmentSlots) {
+                    if (slot != null && slot.isEmpty())
+                        slot.addEquipment(equipment);
+                    else
+                        continue;
+                }
 
-		// Add the new equipment then invoke the onEquip method with the current actor
-		// as the parameter
-		slot.addEquipment(equipment);
-		slot.getSlotEquipment().onEquip(this);
-	}
+                break;
+            default:
+                Main.log.debug("Equipping to slot type: " + equipment.getEquipSlotType());
+                EquipmentSlot s = armorEquipmentSlots[equipment.getEquipSlotType().ordinal()];
 
-	public void unequipEquipment(EquipmentSlot slot) {
-		slot.getSlotEquipment().onUnequip(this);
-		slot.removeEquipment();
-	}
+                if (s.isEmpty())
+                    s.addEquipment(equipment);
+                else {
+                    replaceSlot(s, equipment);
+                }
+                break;
 
-	public void setActorName(String actorName) {
-		this.actorName = actorName;
-	}
+        }
 
-	public void setActorAbilityScores(int[] actorAbilityScores) {
-		this.actorAbilityScores = actorAbilityScores;
-	}
+        equipment.onEquip(this);
+    }
 
-	public void setActorSkills(int[] actorSkills) {
-		this.actorSkills = actorSkills;
-	}
+    private void replaceSlot(EquipmentSlot slot, Equipment equipment) {
+        // Unequip and remove the current equipment from the slot
+        slot.getSlotEquipment().onUnequip(this);
+        slot.removeEquipment();
 
-	public void setActorRace(ActorRace actorRace) {
-		this.actorRace = actorRace;
-	}
+        // Add the new equipment then invoke the onEquip method with the current actor
+        // as the parameter
+        slot.addEquipment(equipment);
+        slot.getSlotEquipment().onEquip(this);
+    }
 
-	public void setActorCharacterClass(CharacterClass actorCharacterClass) {
-		this.actorCharacterClass = actorCharacterClass;
-	}
+    public void unequipEquipment(EquipmentSlot slot) {
+        slot.getSlotEquipment().onUnequip(this);
+        slot.removeEquipment();
+    }
 
-	public String getActorId() {
-		return actorId;
-	}
+    public void modifyActorExperience(int amount) {
+        actorExperience += amount;
+    }
 
-	public String getActorName() {
-		return actorName;
-	}
+    public void modifyActorHealth(int amount) {
+        // The actor's health can not be greater than their maximum health or less than 0
+        actorCurrentHealth = Math.max(0, Math.min(actorCurrentHealth + amount, actorMaxHealth));
+    }
 
-	public ActorRace getActorRace() {
-		return actorRace;
-	}
+    public void modifyActorMana(int amount) {
+        // The actor's mana can not be greater than their maximum mana or less than 0
+        actorCurrentMana = Math.max(0, Math.min(actorCurrentMana + amount, actorMaxMana));
+    }
 
-	public CharacterClass getActorCharacterClass() {
-		return actorCharacterClass;
-	}
+    public void setActorName(String actorName) {
+        this.actorName = actorName;
+    }
 
-	public int getActorArmorClass() {
-		return 10 + Utils.getAbilityModifier(getActorAbilityScore(EnumAbility.DEXTERITY));
-	}
+    public void setActorDescription(String actorDescription) {
+        this.actorDescription = actorDescription;
+    }
 
-	public int getActorTotalLevel() {
-		// The Player's Level is a total of all there skills
-		int level = 0;
-		for (int i : actorSkills)
-			level += i;
+    public void setActorAbilityScores(int[] actorAbilityScores) {
+        this.actorAbilityScores = actorAbilityScores;
+    }
 
-		return level;
-	}
+    public void setActorSkills(int[] actorSkills) {
+        this.actorSkills = actorSkills;
+    }
 
-	public int getActorAbilityScore(EnumAbility stat) {
-		return actorAbilityScores[stat.ordinal()];
-	}
+    public void setActorRace(ActorRace actorRace) {
+        this.actorRace = actorRace;
+    }
 
-	public int getActorSkill(EnumSkill skill) {
-		return actorSkills[skill.ordinal()];
-	}
+    public void setActorInventory(Inventory actorInventory) {
+        this.actorInventory = actorInventory;
+    }
 
-	public int getActorSkillXp(EnumSkill skill) {
-		return actorSkillsXp[skill.ordinal()];
-	}
+    public void setActorFactionList(List<Faction> actorFactionList) {
+        this.actorFactionList = actorFactionList;
+    }
 
-	public int[] getActorAbilityScores() {
-		return actorAbilityScores;
-	}
+    public void setActorCharacterClass(CharacterClass actorCharacterClass) {
+        this.actorCharacterClass = actorCharacterClass;
+    }
 
-	public int[] getActorSkills() {
-		return actorSkills;
-	}
+    public String getActorId() {
+        return actorId;
+    }
 
-	public int[] getActorSkillsXp() {
-		return actorSkillsXp;
-	}
+    public String getActorName() {
+        return actorName;
+    }
 
-	public EquipmentSlot[] getArmorEquipmentSlots() {
-		return armorEquipmentSlots;
-	}
+    public String getActorDescription() {
+        return actorDescription;
+    }
 
-	public EquipmentSlot[] getRingEquipmentSlots() {
-		return ringEquipmentSlots;
-	}
+    public ActorRace getActorRace() {
+        return actorRace;
+    }
 
-	public EquipmentSlot[] getAmuletEquipmentSlots() {
-		return amuletEquipmentSlots;
-	}
+    public CharacterClass getActorCharacterClass() {
+        return actorCharacterClass;
+    }
 
-	public Inventory getActorInventory() {
-		return actorInventory;
-	}
+    public int getActorArmorClass() {
+        // The Actor's armor class is calculated by Dnd rules
+        // The armor class is calculated by adding the armor class bonus from the equipment
+        // and the dexterity modifier from the actor's ability scores
+        int armorClass = 0;
 
-	public List<Faction> getActorFactionList() {
-		return actorFactionList;
-	}
+        for (EquipmentSlot slot : armorEquipmentSlots) {
+            if (slot.getSlotEquipment() != null)
+                armorClass += slot.getSlotEquipment().getArmorClassModifier();
+        }
+
+        armorClass += actorAbilityScores[EnumAbility.DEXTERITY.ordinal()];
+
+        return armorClass;
+    }
+
+    public int getActorMaxHealth() {
+        // The Actor's max health is calculated by DnD rules
+        // The formula is: (CON Modifier) + (Level * 5) + 10
+        return (Utils.getAbilityModifier(getActorAbilityScore(EnumAbility.CONSTITUTION)) + (getActorLevel() * 5)) + 10;
+    }
+
+    public int getActorMaxMana() {
+        // The Actor's max mana is calculated by DnD rules
+        // The formula is: (WIS Modifier) + (Level * 5) + 10
+        return (Utils.getAbilityModifier(getActorAbilityScore(EnumAbility.WISDOM)) + (getActorLevel() * 5)) + 10;
+    }
+
+    public int getActorLevel() {
+        // The actorrs level is calculated with the following:
+        // FLOOR(-2.5 + SQRT(8 * actorXp + 1225) / 10)
+        return actorLevel = (int) Math.floor(-2.5 + Math.sqrt(8 * actorExperience + 1225) / 10);
+    }
+
+    public int getActorCurrentHealth() {
+        return actorCurrentHealth;
+    }
+
+    public int getActorCurrentMana() {
+        return actorCurrentMana;
+    }
+
+    public int getActorExperience() {
+        return actorExperience;
+    }
+
+    public int getActorAbilityScore(EnumAbility stat) {
+        return actorAbilityScores[stat.ordinal()];
+    }
+
+    public int getActorSkill(EnumSkill skill) {
+        return actorSkills[skill.ordinal()];
+    }
+
+    public int[] getActorAbilityScores() {
+        return actorAbilityScores;
+    }
+
+    public int[] getActorSkills() {
+        return actorSkills;
+    }
+
+    public EquipmentSlot[] getArmorEquipmentSlots() {
+        return armorEquipmentSlots;
+    }
+
+    public EquipmentSlot[] getRingEquipmentSlots() {
+        return ringEquipmentSlots;
+    }
+
+    public EquipmentSlot[] getAmuletEquipmentSlots() {
+        return amuletEquipmentSlots;
+    }
+
+    public Inventory getActorInventory() {
+        return actorInventory;
+    }
+
+    public List<Spell> getActorSpellList() {
+        return actorSpellList;
+    }
+
+    public List<Faction> getActorFactionList() {
+        return actorFactionList;
+    }
 
 }

@@ -36,4 +36,12 @@ public class Player extends Actor {
 		return playerJournal;
 	}
 
+	@Override
+	public void setActorDescription(String description) {}
+
+	@Override
+	public String getActorDescription() {
+		return "The Player Character";
+	}
+
 }

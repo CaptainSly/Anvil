@@ -35,4 +35,8 @@ public class Equipment extends Item implements IEquipable {
 	public void onUnequip(Actor actor) {
 	}
 
+	public int getArmorClassModifier() {
+		return armorClassModifier;
+	}
+
 }

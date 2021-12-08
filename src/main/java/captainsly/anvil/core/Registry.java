@@ -3,14 +3,12 @@ package captainsly.anvil.core;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.stream.JsonReader;
 
 import captainsly.Main;
-import captainsly.anvil.mechanics.container.Inventory;
 import captainsly.anvil.mechanics.entities.Actor;
 import captainsly.anvil.mechanics.entities.actrace.ActorRace;
 import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
@@ -18,13 +16,11 @@ import captainsly.anvil.mechanics.enums.EnumAbility;
 import captainsly.anvil.mechanics.enums.EnumDirection;
 import captainsly.anvil.mechanics.enums.EnumSkill;
 import captainsly.anvil.mechanics.events.GameEvent;
-import captainsly.anvil.mechanics.factions.Faction;
 import captainsly.anvil.mechanics.items.Item;
 import captainsly.anvil.mechanics.locations.Location;
 import captainsly.anvil.mechanics.objBuilders.ActorRaceBuilder;
 import captainsly.anvil.mechanics.objBuilders.CharacterClassBuilder;
 import captainsly.anvil.mechanics.objBuilders.LocationBuilder;
-import captainsly.anvil.mechanics.player.Player;
 import captainsly.utils.Utils;
 
 public class Registry {
@@ -41,7 +37,6 @@ public class Registry {
 	public static void register() {
 		Main.log.debug("Registering Objects to respective lists");
 
-		
 		// Register Classes
 		// Register Races
 

@@ -67,13 +67,17 @@ public class EquipmentSwatch extends Region {
 		btnFootSlot.setGraphic(new ImageView(new Image("icons/icon_boots.png")));
 		btnFootSlot.setTooltip(createEquipmentTooltip(armorEquipmentSlots[EnumEquipmentSlotType.FEET.ordinal()]));
 
-		// TODO: Drag and Drop equipping, and necklace and ring popover
+		// TODO: Drag and Drop equipping, and necklace and ring popovers
+
+
 		ringPopOver = new PopOver();
 		ringPopOver.setContentNode(createPopOverFlow(ringEquipmentSlots));
+		ringPopOver.setDetachable(false);
 
 		// Setup the Amulet PopOver
 		amuletPopOver = new PopOver();
 		amuletPopOver.setContentNode(createPopOverFlow(amuletEquipmentSlots));
+		amuletPopOver.setDetachable(false);
 
 		btnRingSlot.setOnDragDetected(e -> ringPopOver.show(btnRingSlot));
 		btnNeckSlot.setOnDragDetected(e -> amuletPopOver.show(btnNeckSlot));
