@@ -1,0 +1,43 @@
+{
+    "currentLocation": "locationPresca",
+    "player": {
+        "name": "Azraein",
+        "exp": 520,
+        "currentHP": 8,
+        "currentMP": 8,
+        "abilityScores": {
+            "STRENGTH": 14,
+            "DEXTERITY": 21,
+            "CONSTITUTION": 11,
+            "INTELLIGENCE": 17,
+            "WISDOM": 14,
+            "CHARISMA": 16
+        },
+        "skillScores": {
+            "ONE_HANDED": 6,
+            "TWO_HANDED": 13,
+            "BLUNT": 19,
+            "LOCKPICKING": 35,
+            "PICKPOCKETING": 44,
+            "SMITHING": 39,
+            "ENCHANTING": 10,
+            "FISHING": 9,
+            "WOOD_CUTTING": 6,
+            "LIGHT_MAGIC": 10,
+            "DARK_MAGIC": 8,
+            "FIRE_MAGIC": 8,
+            "EARTH_MAGIC": 11,
+            "FROST_MAGIC": 8,
+            "WATER_MAGIC": 10,
+            "HEAVY_ARMOR": 8,
+            "LIGHT_ARMOR": 10,
+            "MEDIUM_ARMOR": 9
+        },
+        "actorRace": "raceElf01",
+        "actorClass": "classWizard",
+        "inventory": {},
+        "equippedArmor": {},
+        "equippedRings": {},
+        "equippedAmulets": {}
+    }
+}

@@ -1,7 +1,13 @@
-# Ignore Gradle project-specific cache directory
+# Ignore IDE and Gradle Files
+.idea
+.settings
+.vscode
 .gradle
+.classpath
+.project
+
+
 
 # Ignore Gradle build output directory
-build
-anvil
+build/
 gradle.properties

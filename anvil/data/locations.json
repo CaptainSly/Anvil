@@ -1,0 +1,35 @@
+{
+	"locationCalinfor": {
+		"name": "Calinfor",
+		"description": "",
+		"neighbors": {
+			"east": "locationTimsoth"
+		}
+	},
+	
+	"locationTimsoth": {
+		"name": "The Timsoth Passage",
+		"description": "A flowery grove that holds the way to Presca and Calinfor",
+		"neighbors": {
+			"west": "locationCalinfor",
+			"east": "locationPresca"
+		}
+	},
+	
+	"locationPresca": {
+		"name": "Presca",
+		"description": "",
+		"neighbors": {
+			"west": "locationTimsoth",
+			"north": "locationAlbianForest"
+		}
+	},
+	
+	"locationAlbianForest": {
+		"name": "The Albian Forest",
+		"description": "A frozen forest that is veiled with magic, many monsters call this place home, and it is the only way to reach the Spirian Kingdom",
+		"neighbors": {
+			"south": "locationPresca"
+		}
+	}
+}

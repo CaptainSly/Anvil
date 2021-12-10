@@ -1,0 +1,49 @@
+{
+  "actorTestBob": {
+    "name": "Bob",
+    "description": "A test actor.",
+    "actorRace": "raceHuman",
+    "actorClass": "classWarrior",
+    "actorExperience": 250,
+    "actorAbilityScores": {
+      "constitution": 9,
+      "strength": 6,
+      "dexterity": 6,
+      "intelligence": 4,
+      "wisdom": 8,
+      "charisma": 5
+    },
+    "actorSkillScores": {
+      "one handed": 3,
+      "two handed": 3,
+      "blunt": 3,
+      "lockpicking": 3,
+      "pickpocketing": 3,
+      "enchanting": 3,
+      "fishing": 3,
+      "wood cutting": 3,
+      "light magic": 3,
+      "fire magic": 3,
+      "frost magic": 3,
+      "earth magic": 3,
+      "water magic": 3,
+      "light armor": 3,
+      "heavy armor": 3,
+      "medium armor": 3
+    },
+    "actorFactions": [
+      "factionTest",
+      "factionTest2"
+    ],
+    "actorInventory": [
+      {
+        "item": "itemTest",
+        "quantity": 1
+      }
+    ],
+    "actorSpells": [
+      "spellTest"
+    ]
+  }
+
+}

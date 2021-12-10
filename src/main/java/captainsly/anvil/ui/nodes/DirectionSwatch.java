@@ -82,7 +82,7 @@ public class DirectionSwatch extends Region {
 	}
 
 	public void setCurrentLocation(String currentLocationId) {
-		this.currentLocation = Registry.locationsMap.get(currentLocationId);
+		this.currentLocation = Registry.getLocation(currentLocationId);
 		anvil.setCurrentLocation(currentLocation);
 		anvil.clearConsole();
 
@@ -107,7 +107,7 @@ public class DirectionSwatch extends Region {
 
 		// Write out the neighbor locations
 		for (int i = 0; i < currentLocation.getNeighborLocationIds().length; i++) {
-			Location location = Registry.locationsMap.get(currentLocation.getNeighborLocationIds()[i]);
+			Location location = Registry.getLocation(currentLocation.getNeighborLocationIds()[i]);
 
 			if (location != null) {
 				anvil.writeToConsole("\n" + location.getLocationName() + " is to the "

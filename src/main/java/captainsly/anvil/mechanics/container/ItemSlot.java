@@ -48,6 +48,10 @@ public class ItemSlot implements Comparable<ItemSlot> {
 			isEmpty = true;
 	}
 
+	public void setItemCount(int itemCount) {
+		this.itemCount = itemCount;
+	}
+
 	public void emptySlot() {
 		removeItem(itemCount);
 	}

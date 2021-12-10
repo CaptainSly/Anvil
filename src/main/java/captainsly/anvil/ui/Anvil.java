@@ -1,9 +1,12 @@
 package captainsly.anvil.ui;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import captainsly.Main;
 import captainsly.anvil.core.Registry;
+import captainsly.anvil.mechanics.SaveSystem;
 import captainsly.anvil.mechanics.entities.actrace.ActorRace;
 import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
 import captainsly.anvil.mechanics.locations.Location;
@@ -12,6 +15,7 @@ import captainsly.anvil.mechanics.objBuilders.CharacterClassBuilder.CharacterCla
 import captainsly.anvil.mechanics.player.Player;
 import captainsly.anvil.mechanics.world.GameWorld;
 import captainsly.anvil.ui.nodes.*;
+import captainsly.utils.Utils;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -60,25 +64,32 @@ public class Anvil extends Application {
         menuHBox = new HBox();
         playerOptionsVBox = new VBox();
 
-        currentLocation = Registry.locationsMap.get("locationCalinfor");
-
         interactionTextArea = new TextArea();
         interactionTextArea.setWrapText(true);
         interactionTextArea.setEditable(false);
-//		interactionTextArea.setStyle("-fx-font-size: 18");
+		interactionTextArea.setStyle("-fx-font-size: 14");
 
-        Player player = createPlayer();
+        setCurrentLocation(Registry.getLocation("locationCalinfor"));
+
+        Player player;
+        if (new File(Utils.SAVE_DIRECTORY).listFiles().length == 0) {
+            Main.log.debug("No save file found, creating new player");
+            player = createPlayer();
+            SaveSystem.savePlayerData(this, player);
+        } else {
+            Main.log.debug("Loading player data");
+            player = SaveSystem.loadPlayerData(this);
+        }
 
         gameWorld = new GameWorld(this, player);
 
 
         inventoryView = new InventoryView(player);
         equipmentSwatch = new EquipmentSwatch(player);
-        playerStatView = new PlayerStatsView(player);
+        playerStatView = new PlayerStatsView(this, player);
 
         locationActorView = new LocationActorView(this, currentLocation);
         dirSwatch = new DirectionSwatch(this);
-
         setLocation(currentLocation);
 
         menuHBox.getChildren().addAll();
@@ -153,13 +164,13 @@ public class Anvil extends Application {
             }
         });
 
-        Iterator<Entry<String, ActorRace>> raceIterator = Registry.actorRacesMap.entrySet().iterator();
+        Iterator<Entry<String, ActorRace>> raceIterator = Registry.getActorRaceRegistry().entrySet().iterator();
         while (raceIterator.hasNext()) {
             ActorRace race = raceIterator.next().getValue();
             raceChoiceBox.getItems().add(race);
         }
 
-        Iterator<Entry<String, CharacterClass>> classIterator = Registry.characterClassMap.entrySet().iterator();
+        Iterator<Entry<String, CharacterClass>> classIterator = Registry.getCharacterClassRegistry().entrySet().iterator();
         while (classIterator.hasNext()) {
             CharacterClass cclass = classIterator.next().getValue();
             classChoiceBox.getItems().add(cclass);
@@ -196,7 +207,11 @@ public class Anvil extends Application {
 
         // Update the GameWorld
         gameWorld.setCurrentLocation(location);
-        gameWorld.updateView();
+        gameWorld.updateGameWorld();
+    }
+
+    public void update() {
+        // Update Any views that need to be updated in case of events
     }
 
     public void setCurrentLocation(Location currentLocation) {

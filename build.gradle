@@ -16,10 +16,12 @@ ext {
 	luajVersion = "3.0.1"
 	fontfxVersion = "8.9"
 	gsonVersion = "2.8.9"
+	anchorCommit = "0773eb4419"
 }
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -31,6 +33,7 @@ dependencies {
 	// JavaFX
 	implementation "de.jensd:fontawesomefx:${fontfxVersion}"
 	implementation 'org.controlsfx:controlsfx:11.1.0'
+	implementation "com.github.alexbodogit:AnchorFX:${anchorCommit}"
 
 	// LuaJ
 	implementation "org.luaj:luaj-jse:${luajVersion}"

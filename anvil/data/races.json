@@ -1,0 +1,81 @@
+{
+	"raceDwarf": {
+		"name": "Dwarf",
+		"description": "Dwarves are short and stout beings that stand well under 5ft tall, dwarves are so broad and compact that they weigh as much as a human that is 2 feet taller. Courageous, fierce and loyal they protect their forges and smithies as well as their livestock and loot. The different types of dwarves are the Hill Dwarves and the Mountain Dwarves.",
+		"abilityBonuses": {
+			"Constitution": 2,
+			"Strength": 2,
+			"Wisdom": 1
+		},
+		"skillBonuses": {
+			"Heavy_Armor": 3,
+			"Two_Handed": 2,
+			"Smithing": 5
+		}
+	},
+	"raceElf01": {
+		"name": "Dark Elf",
+		"description": "Magical, tall, slender and graceful beings, living in places of upmost magical power, they have a long lifespan and are gifted in the arcane arts. There are three different types of elves, the Wood Elves, the High Elves, and the Dark Elves.",
+		"abilityBonuses": {
+			"Dexterity": 2,
+			"Intelligence": 1,
+			"Wisdom": 1,
+			"Charisma": 1
+		},
+		"skillBonuses": {
+			"Dark_Magic": 5,
+			"Fire_Magic": 5,
+			"Pickpocketing": 3,
+			"Lockpicking": 2
+		}
+	},
+	"raceElf02": {
+		"name": "High Elf",
+		"description": "Magical, tall, slender and graceful beings, living in places of upmost magical power, they have a long lifespan and are gifted in the arcane arts. There are three different types of elves, the Wood Elves, the High Elves, and the Dark Elves.",
+		"abilityBonuses": {
+			"Dexterity": 2,
+			"Intelligence": 1,
+			"Wisdom": 1,
+			"Charisma": 1
+		},
+		"skillBonuses": {
+			"Light_Magic": 5,
+			"Frost_Magic": 5,
+			"Enchanting": 3
+		}
+	},
+	"raceElf03": {
+		"name": "Wood Elf",
+		"description": "Magical, tall, slender and graceful beings, living in places of upmost magical power, they have a long lifespan and are gifted in the arcane arts. There are three different types of elves, the Wood Elves, the High Elves, and the Dark Elves.",
+		"abilityBonuses": {
+			"Dexterity": 2,
+			"Intelligence": 1,
+			"Wisdom": 1,
+			"Charisma": 1
+		},
+		"skillBonuses": {
+			"Earth_Magic": 5,
+			"Water_Magic": 5,
+			"Fishing": 3,
+			"Wood_Cutting": 2
+		}
+	},
+	"raceHuman": {
+		"name": "Human",
+		"description": "Humans are the youngest of the common races and also one of the races with the shortest life span. They prove to be great warriors and build marvelous villages, communities and kingdoms.",
+		"abilityBonuses": {
+			"Strength": 1,
+			"Constitution": 1,
+			"Dexterity": 1,
+			"Intelligence": 1,
+			"Wisdom": 1,
+			"Charisma": 1
+		},
+		"skillBonuses": {
+			"One_Handed": 3,
+			"Two_Handed": 3,
+			"Wood_Cutting": 2,
+			"Fishing": 2
+		}
+	}
+}

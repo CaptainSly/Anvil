@@ -11,37 +11,29 @@ import captainsly.utils.Utils;
 
 public class Player extends Actor {
 
-	private static final long serialVersionUID = 2077666720416949312L;
-	private PlayerJournal playerJournal;
+    private static final long serialVersionUID = 2077666720416949312L;
+    private PlayerJournal playerJournal;
 
-	public Player(ActorRace playerActorRace, CharacterClass playerCharacterClass) {
-		super("actPlayer", playerActorRace, playerCharacterClass);
-		playerJournal = new PlayerJournal(this);
+    public Player(ActorRace playerActorRace, CharacterClass playerCharacterClass) {
+        super("actPlayer", playerActorRace, playerCharacterClass);
+        playerJournal = new PlayerJournal(this);
+    }
 
-		int[] scores = Utils.generateAbilityScores();
-		for (int i = 0; i < EnumAbility.values().length; i++)
-			modifyActorAbilityScore(EnumAbility.values()[i], scores[i]);
+    public Player() {
+        this(Registry.getActorRace("raceDwarf"), Registry.getCharacterClass("classBarbarian"));
+    }
 
-		scores = Utils.generateSkillScores();
-		for (int i = 0; i < EnumSkill.values().length; i++)
-			modifyActorSkill(EnumSkill.values()[i], scores[i]);
+    public PlayerJournal getPlayerJournal() {
+        return playerJournal;
+    }
 
-	}
+    @Override
+    public void setActorDescription(String description) {
+    }
 
-	public Player() {
-		this(Registry.actorRacesMap.get("raceDwarf"), Registry.characterClassMap.get("classBarbarian"));
-	}
-
-	public PlayerJournal getPlayerJournal() {
-		return playerJournal;
-	}
-
-	@Override
-	public void setActorDescription(String description) {}
-
-	@Override
-	public String getActorDescription() {
-		return "The Player Character";
-	}
+    @Override
+    public String getActorDescription() {
+        return "The Player Character";
+    }
 
 }

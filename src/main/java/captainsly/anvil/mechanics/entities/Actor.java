@@ -1,8 +1,11 @@
 package captainsly.anvil.mechanics.entities;
 
 import captainsly.Main;
+import captainsly.anvil.mechanics.container.WeaponSlot;
 import captainsly.anvil.mechanics.container.EquipmentSlot;
 import captainsly.anvil.mechanics.container.Inventory;
+import captainsly.anvil.mechanics.container.ShieldSlot;
+import captainsly.anvil.mechanics.container.WeaponSlot;
 import captainsly.anvil.mechanics.entities.actrace.ActorRace;
 import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
 import captainsly.anvil.mechanics.enums.EnumAbility;
@@ -44,6 +47,8 @@ public class Actor implements Serializable {
     private EquipmentSlot[] armorEquipmentSlots;
     private EquipmentSlot[] ringEquipmentSlots;
     private EquipmentSlot[] amuletEquipmentSlots;
+    private WeaponSlot weaponEquipmentSlot;
+    private ShieldSlot shieldEquipmentSlot;
 
     private List<Spell> actorSpellList;
 
@@ -58,6 +63,55 @@ public class Actor implements Serializable {
 
         // Instantiate the actor's skills, abilitity scores and health and mana
 
+        actorAbilityScores = Utils.generateAbilityScores();
+        actorSkills = Utils.generateSkillScores();
+
+        // Generate New Scores for the actor
+
+
+        // Add The Actor's Racial Bonus to their stats and Skill Bonuses
+        for (int i = 0; i < actorAbilityScores.length; i++) {
+            actorAbilityScores[i] += actorRace.getActorRaceBenefitsAbility()[i];
+            actorSkills[i] += actorCharacterClass.getCharacterClassSkillBonuses()[i];
+            actorSkills[i] += actorRace.getActorRaceBenefitsSkill()[i];
+        }
+
+        actorExperience = 0;
+        actorMaxHealth = getActorMaxHealth();
+        actorMaxMana = getActorMaxMana();
+
+        actorCurrentHealth = actorMaxHealth;
+        actorCurrentMana = actorMaxMana;
+
+        // Setup Equipment Slots
+        amuletEquipmentSlots = new EquipmentSlot[5]; // Does your chain hang low?
+        ringEquipmentSlots = new EquipmentSlot[10]; // There is ten fingers
+        armorEquipmentSlots = new EquipmentSlot[EnumEquipmentSlotType.values().length - 2];
+        weaponEquipmentSlot = new WeaponSlot();
+        shieldEquipmentSlot = new ShieldSlot();
+
+        // Create Equipment Slots
+        for (int i = 0; i < armorEquipmentSlots.length; i++)
+            armorEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.values()[i]);
+
+        for (int i = 0; i < ringEquipmentSlots.length; i++)
+            ringEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.RINGS);
+
+        for (int i = 0; i < amuletEquipmentSlots.length; i++)
+            amuletEquipmentSlots[i] = new EquipmentSlot(EnumEquipmentSlotType.NECK);
+    }
+
+
+    public Actor(boolean loading, String actorId, ActorRace actorRace, CharacterClass actorCharacterClass) {
+        this.actorId = actorId;
+        this.actorRace = actorRace;
+        this.actorCharacterClass = actorCharacterClass;
+
+        actorInventory = new Inventory();
+        actorFactionList = new ArrayList<>();
+        actorSpellList = new ArrayList<>();
+
+        // Instantiate the actor's skills, abilitity scores and health and mana
         actorAbilityScores = new int[EnumAbility.values().length];
         actorSkills = new int[EnumSkill.values().length];
 
@@ -77,6 +131,8 @@ public class Actor implements Serializable {
         amuletEquipmentSlots = new EquipmentSlot[5]; // Does your chain hang low?
         ringEquipmentSlots = new EquipmentSlot[10]; // There is ten fingers
         armorEquipmentSlots = new EquipmentSlot[EnumEquipmentSlotType.values().length - 2];
+        weaponEquipmentSlot = new WeaponSlot();
+        shieldEquipmentSlot = new ShieldSlot();
 
         // Create Equipment Slots
         for (int i = 0; i < armorEquipmentSlots.length; i++)
@@ -187,6 +243,12 @@ public class Actor implements Serializable {
     }
 
     public void setActorRace(ActorRace actorRace) {
+        // Add The Actor's Racial Bonus to their stats and Skill Bonuses
+        for (int i = 0; i < actorAbilityScores.length; i++) {
+            actorAbilityScores[i] += actorRace.getActorRaceBenefitsAbility()[i];
+            actorSkills[i] += actorRace.getActorRaceBenefitsSkill()[i];
+        }
+
         this.actorRace = actorRace;
     }
 
@@ -199,7 +261,40 @@ public class Actor implements Serializable {
     }
 
     public void setActorCharacterClass(CharacterClass actorCharacterClass) {
+        // Add The Actor's Racial Bonus to their stats and Skill Bonuses
+        for (int i = 0; i < actorAbilityScores.length; i++) {
+            actorSkills[i] += actorCharacterClass.getCharacterClassSkillBonuses()[i];
+            actorAbilityScores[i] += actorCharacterClass.getCharacterClassAbilityBonuses()[i];
+        }
         this.actorCharacterClass = actorCharacterClass;
+    }
+
+    public void setActorExperience(int actorExperience) {
+        this.actorExperience = actorExperience;
+    }
+
+    public void setActorCurrentHealth(int actorCurrentHealth) {
+        this.actorCurrentHealth = actorCurrentHealth;
+    }
+
+    public void setActorMaxHealth(int actorMaxHealth) {
+        this.actorMaxHealth = actorMaxHealth;
+    }
+
+    public void setActorCurrentMana(int actorCurrentMana) {
+        this.actorCurrentMana = actorCurrentMana;
+    }
+
+    public void setActorMaxMana(int actorMaxMana) {
+        this.actorMaxMana = actorMaxMana;
+    }
+
+    public void setActorAbilityScore(EnumAbility abilityScore, int score) {
+        actorAbilityScores[abilityScore.ordinal()] = score;
+    }
+
+    public void setActorSkillScore(EnumSkill skill, int score) {
+        actorSkills[skill.ordinal()] = score;
     }
 
     public String getActorId() {
@@ -294,6 +389,14 @@ public class Actor implements Serializable {
 
     public EquipmentSlot[] getAmuletEquipmentSlots() {
         return amuletEquipmentSlots;
+    }
+
+    public WeaponSlot getWeaponEquipmentSlot() {
+        return weaponEquipmentSlot;
+    }
+
+    public ShieldSlot getShieldEquipmentSlot() {
+        return shieldEquipmentSlot;
     }
 
     public Inventory getActorInventory() {

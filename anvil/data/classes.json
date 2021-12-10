@@ -1,0 +1,146 @@
+{
+	"classBarbarian": {
+		"name": "Barbarian",
+		"description": "A fiere warrior of primitive background who can always rise to the chance of battle",
+		"abilityBonuses": {
+			"Strength": 2,
+			"Constitution": 3
+		},
+		"skillBonuses": {
+			"One_Handed": 3,
+			"Two_Handed": 3,
+			"Light_Armor": 2,
+			"Medium_Armor": 2,
+			"Blunt": 3
+		}
+	},
+	
+	"classBard": {
+		"name": "Bard",
+		"description": "An aspiring magician whose power echoes the music of creation",
+		"abilityBonuses": {
+			"Charisma": 4,
+			"Dexterity": 2
+		},
+		"skillBonuses": {
+			"One_Handed": 2,
+			"Light_Armor": 3,
+			"Light_Magic": 3,
+			"Fire_Magic": 2,
+			"Earth_Magic": 2,
+			"Frost_Magic": 2,
+			"Water_Magic": 2,
+			"Enchanting": 2
+		}
+	},
+	
+	"classCleric": {
+		"name": "Cleric",
+		"description": "A priestly champion who wields divine magic in service of a higher power",
+		"abilityBonuses": {
+			"Wisdom": 3,
+			"Charisma": 2
+		},
+		"skillBonuses": {
+			"One_Handed": 3,
+			"Light_Magic": 3,
+			"Frost_Magic": 3,
+			"Water_Magic": 3,
+			"Light_Armor": 2,
+			"Medium_Armor": 2
+			
+		}
+	},
+	
+	"classDruid": {
+		"name": "Druid",
+		"description": "A priest of the Old Faith, weilding the power of nature --moonlight, plant growth, fire and lighting -- and adopting animal forms",
+		"abilityBonuses": {
+			"Wisdom": 3,
+			"Intelligence": 2
+		},
+		"skillBonuses": {
+			"Blunt": 2,
+			"Light_Armor": 3,
+			"Medium_Armor": 3,
+			"Light_Magic": 4,
+			"Fire_Magic": 4,
+			"Water_Magic": 4,
+			"Earth_Magic": 4
+		}
+	},
+		
+	"classRogue": {
+		"name": "Rogue",
+		"description": "A scoundrel who uses stealth and trickery to overcome obstacles and enemies",
+		"abilityBonuses": {
+			"Dexterity": 3,
+			"Intelligence": 2
+		},
+		"skillBonuses": {
+			"Blunt": 2,
+			"One_Handed": 3,
+			"Pickpocketing": 2,
+			"Lockpicking": 2,
+			"Light_Armor": 2,
+			"Medium_Armor": 3
+		}
+	},
+	
+	"classSorcerer": {
+		"name": "Sorcerer",
+		"description": "A spellcaster who draws on inherent magic from a gift or bloodline",
+		"abilityBonuses": {
+			"Wisdom": 3,
+			"Intelligence": 2
+		},
+		"skillBonuses": {
+			"Blunt": 2,
+			"Light_Armor": 3,
+			"Medium_Armor": 3,
+			"Light_Magic": 4,
+			"Fire_Magic": 4,
+			"Water_Magic": 4,
+			"Earth_Magic": 4
+		}
+	},
+	
+	"classWarlock": {
+		"name": "Warlock",
+		"description": "A wielder of magic that is derived from a bargain with an extraplanar entity",
+		"abilityBonuses": {
+			"Charisma": 3,
+			"Wisdom": 3,
+			"Intelligence": 2
+		},
+		"skillBonuses": {
+			"One_Handed": 2,
+			"Light_Armor": 1,
+			"Medium_Armor": 1,
+			"Light_Magic": 4,
+			"Fire_Magic": 2,
+			"Water_Magic": 4,
+			"Earth_Magic": 3
+		}
+	},
+	
+	"classWizard": {
+		"name": "Wizard",
+		"description": "A scholarly magic-user capable of manipulating the structures of reality",
+		"abilityBonuses": {
+			"Wisdom": 3,
+			"Intelligence": 2
+		},
+		"skillBonuses": {
+			"One_Handed": 2,
+			"Light_Armor": 2,
+			"Medium_Armor": 1,
+			"Light_Magic": 4,
+			"Fire_Magic": 4,
+			"Water_Magic": 3,
+			"Earth_Magic": 3,
+			"Frost_Magic": 4,
+			"Dark_Magic": 2
+		}
+	}
+}

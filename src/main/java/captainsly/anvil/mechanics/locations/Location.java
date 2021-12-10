@@ -57,7 +57,7 @@ public class Location {
 	}
 
 	public Location getNeighboringLocation(EnumDirection dir) {
-		return Registry.locationsMap.get(getNeighboringLocationId(dir));
+		return Registry.getLocation(getNeighboringLocationId(dir));
 	}
 
 	public List<Actor> getLocationActorsList() {

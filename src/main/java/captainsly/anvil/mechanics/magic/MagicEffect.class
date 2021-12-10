@@ -1,0 +1,25 @@
+package captainsly.anvil.mechanics.magic;
+
+public class MagicEffect {
+
+    // String magicEffectId, magicEffectName
+    private String magicEffectId;
+    private String magicEffectName;
+
+    // Constructor
+    public MagicEffect(String magicEffectId, String magicEffectName) {
+        this.magicEffectId = magicEffectId;
+        this.magicEffectName = magicEffectName;
+    }
+
+    // Getters
+    public String getMagicEffectId() {
+        return magicEffectId;
+    }
+    
+    public String getMagicEffectName() {
+        return magicEffectName;
+    }
+    
+
+}

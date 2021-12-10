@@ -54,6 +54,10 @@ public class Inventory {
         return dummySlot;
     }
 
+    public void addItemSlot(ItemSlot slot) {
+        itemSlots.add(slot);
+    }
+
     public ItemSlot getFreeSlot() {
         // Check the itemSlots size; if 0 add a new empty itemslot and return
         if (itemSlots.size() == 0) {
