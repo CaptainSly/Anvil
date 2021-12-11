@@ -1,11 +1,10 @@
 package captainsly;
 
-import org.luaj.vm2.Globals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import captainsly.anvil.core.Registry;
-import captainsly.anvil.core.scripting.AnvilPlatform;
+import captainsly.anvil.core.scripting.AnvilScriptingEngine;
 import captainsly.anvil.ui.Anvil;
 import captainsly.hammer.Hammer;
 import captainsly.utils.Utils;
@@ -13,14 +12,13 @@ import javafx.application.Application;
 
 public class Main {
 
-    public static final String APPLICATION_VERSION = "0.0.1B";
-
+    public static final String APPLICATION_VERSION = "0.1.0B";
     public static final Logger log = LoggerFactory.getLogger("[MAIN]");
-    public static Globals globals;
+    public static AnvilScriptingEngine scriptingEngine;
 
     public static void main(String[] args) {
 
-        // usage: anvilFX [options] required_input required_input2 options:
+        // usage: application [options] required_input required_input2 options:
         // -h Shows this help text
         // -s, --argument Switches the Application that is launched on startup, Options
         // are Hammer or Anvil
@@ -43,10 +41,14 @@ public class Main {
                     if (!Utils.doesWorkingDirExist())
                         Utils.createDefaultWorkingDir();
 
-                    log.info("Creating LuaJ globals with the AnvilPlatform Globals");
-                    globals = AnvilPlatform.standardGlobals();
-
+                    log.info("Creating the Anvil JRuby Scripting Engine");
+                    scriptingEngine = new AnvilScriptingEngine();
+                    log.info("Anvil Scripting Engine Version: " + AnvilScriptingEngine.SCRIPTING_ENGINE_VERSION);
+                    scriptingEngine.init();
+                    
+                    
                     // Registry Stuff
+
                     Registry.register();
 
                     // The Switch Tag, allows you to switch between anvil or hammer.

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import captainsly.anvil.mechanics.items.equipment.weapons.Weapon;
 import com.google.gson.stream.JsonReader;
 
 import captainsly.Main;
@@ -25,12 +26,13 @@ import captainsly.utils.Utils;
 
 public class Registry {
 
-    private static final Map<String, Item> itemsMap = new HashMap<>();
-    private static final Map<String, ActorRace> actorRacesMap = new HashMap<>();
-    private static final Map<String, Location> locationsMap = new HashMap<>();
-    private static final Map<String, CharacterClass> characterClassMap = new HashMap<>();
-    private static final Map<String, Actor> actorMap = new HashMap<>();
-    private static final Map<String, GameEvent> gameEventMap = new HashMap<>();
+    private static final Map<String, Item> itemRegistry = new HashMap<>();
+    private static final Map<String, Weapon> weaponRegistry = new HashMap<>();
+    private static final Map<String, ActorRace> actorRaceRegistry = new HashMap<>();
+    private static final Map<String, Location> locationRegistry = new HashMap<>();
+    private static final Map<String, CharacterClass> characterClassRegistry = new HashMap<>();
+    private static final Map<String, Actor> actorRegistry = new HashMap<>();
+    private static final Map<String, GameEvent> gameEventRegistry = new HashMap<>();
 
     private static final File DATA_DIRECTORY_FILE = new File(Utils.WORKING_DIRECTORY + "data/");
 
@@ -43,59 +45,12 @@ public class Registry {
         registerEquipments();
         registerFactions();
         registerActors();
-        registerEvents();
+//        registerEvents();
         registerLocations();
     }
 
-    public static Location getLocation(String locationId) {
-        return locationsMap.get(locationId);
-    }
-
-    public static Item getItem(String itemId) {
-        return itemsMap.get(itemId);
-    }
-
-    public static ActorRace getActorRace(String actorRaceId) {
-        return actorRacesMap.get(actorRaceId);
-    }
-
-    public static CharacterClass getCharacterClass(String characterClassId) {
-        return characterClassMap.get(characterClassId);
-    }
-
-    public static Map<String, Item> getItemRegistry() {
-        return itemsMap;
-    }
-
-    public static Map<String, ActorRace> getActorRaceRegistry() {
-        return actorRacesMap;
-    }
-
-    public static Map<String, Location> getLocationRegistry() {
-        return locationsMap;
-    }
-
-    public static Map<String, CharacterClass> getCharacterClassRegistry() {
-        return characterClassMap;
-    }
-
-    public static Map<String, Actor> getActorRegistry() {
-        return actorMap;
-    }
-
-    public static Map<String, GameEvent> getGameEventRegistry() {
-        return gameEventMap;
-    }
-
-    public static Actor getActor(String actorId) {
-        return actorMap.get(actorId);
-    }
-
-    public static GameEvent getGameEvent(String gameEventId) {
-        return gameEventMap.get(gameEventId);
-    }
-
     private static void registerItems() {
+        // Register All of the different types of items here
     }
 
     private static void registerEquipments() {
@@ -176,7 +131,7 @@ public class Registry {
                         for (int i = 0; i < EnumSkill.values().length; i++)
                             classBuilder.modifyCharacterSkill(EnumSkill.values()[i], i);
 
-                        characterClassMap.put(classId, classBuilder.build());
+                        characterClassRegistry.put(classId, classBuilder.build());
                         classReader.endObject();
 
                     }
@@ -259,7 +214,7 @@ public class Registry {
                         for (int i = 0; i < EnumSkill.values().length; i++)
                             raceBuilder.modifySkills(EnumSkill.values()[i], raceSkillBonuses[i]);
 
-                        actorRacesMap.put(raceId, raceBuilder.build());
+                        actorRaceRegistry.put(raceId, raceBuilder.build());
                         raceReader.endObject();
 
                     }
@@ -274,6 +229,15 @@ public class Registry {
     }
 
     private static void registerEvents() {
+        // Look through the scripts/events folder and create an event for each script and load it into memory
+        File[] eventScriptFiles = new File(Utils.SCRIPT_DIRECTORY + "events/").listFiles();
+        for (int i = 0; i < eventScriptFiles.length; i++) {
+            if (eventScriptFiles[i].isFile()) {
+                Main.log.debug("Loading event script: " + eventScriptFiles[i].getName());
+                GameEvent event = new GameEvent(Utils.SCRIPT_DIRECTORY + "events/" + eventScriptFiles[i].getName());
+//                Main.log.debug("Event Script Loaded: " + event.getGameEventId());
+            }
+        }
     }
 
     private static void registerLocations() {
@@ -335,7 +299,7 @@ public class Registry {
                                 }
 
                                 // End of the Location Declaration add it to the list
-                                Registry.locationsMap.put(locationId, locationBuilder.build());
+                                Registry.locationRegistry.put(locationId, locationBuilder.build());
                             }
                         }
                         locationReader.endObject();
@@ -349,5 +313,63 @@ public class Registry {
             }
         }
     }
+
+
+    public static Location getLocation(String locationId) {
+        return locationRegistry.get(locationId);
+    }
+
+    public static Item getItem(String itemId) {
+        return itemRegistry.get(itemId);
+    }
+
+    public static Weapon getWeapon(String weaponId) {
+        return weaponRegistry.get(weaponId);
+    }
+
+    public static ActorRace getActorRace(String actorRaceId) {
+        return actorRaceRegistry.get(actorRaceId);
+    }
+
+    public static CharacterClass getCharacterClass(String characterClassId) {
+        return characterClassRegistry.get(characterClassId);
+    }
+
+    public static Map<String, Item> getItemRegistry() {
+        return itemRegistry;
+    }
+
+    public static Map<String, Weapon> getWeaponRegistry() {
+        return weaponRegistry;
+    }
+
+    public static Map<String, ActorRace> getActorRaceRegistry() {
+        return actorRaceRegistry;
+    }
+
+    public static Map<String, Location> getLocationRegistry() {
+        return locationRegistry;
+    }
+
+    public static Map<String, CharacterClass> getCharacterClassRegistry() {
+        return characterClassRegistry;
+    }
+
+    public static Map<String, Actor> getActorRegistry() {
+        return actorRegistry;
+    }
+
+    public static Map<String, GameEvent> getGameEventRegistry() {
+        return gameEventRegistry;
+    }
+
+    public static Actor getActor(String actorId) {
+        return actorRegistry.get(actorId);
+    }
+
+    public static GameEvent getGameEvent(String gameEventId) {
+        return gameEventRegistry.get(gameEventId);
+    }
+
 
 }

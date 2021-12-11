@@ -6,16 +6,23 @@ import java.util.Map.Entry;
 
 import captainsly.Main;
 import captainsly.anvil.core.Registry;
-import captainsly.anvil.mechanics.SaveSystem;
+import captainsly.anvil.core.SaveSystem;
 import captainsly.anvil.mechanics.entities.actrace.ActorRace;
 import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
+import captainsly.anvil.mechanics.events.GameEvent;
 import captainsly.anvil.mechanics.locations.Location;
 import captainsly.anvil.mechanics.objBuilders.ActorRaceBuilder.ActorRaceStringConverter;
 import captainsly.anvil.mechanics.objBuilders.CharacterClassBuilder.CharacterClassStringConverter;
 import captainsly.anvil.mechanics.player.Player;
 import captainsly.anvil.mechanics.world.GameWorld;
-import captainsly.anvil.ui.nodes.*;
+import captainsly.anvil.ui.nodes.DirectionSwatch;
+import captainsly.anvil.ui.nodes.EquipmentSwatch;
+import captainsly.anvil.ui.nodes.InventoryView;
+import captainsly.anvil.ui.nodes.LoadPlayerDialog;
+import captainsly.anvil.ui.nodes.LocationActorView;
+import captainsly.anvil.ui.nodes.PlayerStatsView;
 import captainsly.utils.Utils;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -67,10 +74,12 @@ public class Anvil extends Application {
         interactionTextArea = new TextArea();
         interactionTextArea.setWrapText(true);
         interactionTextArea.setEditable(false);
-		interactionTextArea.setStyle("-fx-font-size: 14");
+        interactionTextArea.setStyle("-fx-font-size: 14");
 
+        // Dummy Location to make sure it's loaded,
         setCurrentLocation(Registry.getLocation("locationCalinfor"));
 
+        // Setup Player, either create a new one or load an existing one
         Player player;
         if (new File(Utils.SAVE_DIRECTORY).listFiles().length == 0) {
             Main.log.debug("No save file found, creating new player");
@@ -78,10 +87,15 @@ public class Anvil extends Application {
             SaveSystem.savePlayerData(this, player);
         } else {
             Main.log.debug("Loading player data");
-            player = SaveSystem.loadPlayerData(this);
+            // Show a popup dialog that displays the save file name and asks if the user wants to load it
+            LoadPlayerDialog loadPlayerDialog = new LoadPlayerDialog(this);
+            player = loadPlayerDialog.showAndWait().get();
         }
 
         gameWorld = new GameWorld(this, player);
+
+		GameEvent gameEvent = new GameEvent("anvil/scripts/events/fishingEvent.rb");
+		gameEvent.onActivate(player);
 
 
         inventoryView = new InventoryView(player);
@@ -100,19 +114,36 @@ public class Anvil extends Application {
         playerOptionsVBox.setPadding(new Insets(5, 5, 5, 5));
         playerOptionsVBox.getChildren().addAll(playerStatView, equipmentSwatch, sep, dirSwatch, inventoryView);
 
+        // Setup up the locationsNodesVBox
         locationNodesVBox = new VBox();
         locationNodesVBox.setPadding(new Insets(5, 5, 5, 5));
         locationNodesVBox.getChildren().addAll(locationActorView);
 
+        // Set the Control BorderPane's left content to the plaerOptionsVBox
         controlBP.setLeft(playerOptionsVBox);
 
+        // Add the nodes to the Root BorderPane
         rootBP.setTop(menuHBox);
         rootBP.setLeft(controlBP);
         rootBP.setRight(locationNodesVBox);
         rootBP.setCenter(interactionTextArea);
 
-        anchorPane.getChildren().add(rootBP);
+        // Setup the AnimationTimer "Game Loop"
+        final long startNanoTime = System.nanoTime();
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                double delta = (now - startNanoTime) / 1000000000.0;
 
+                // Update the game world
+                gameWorld.updateGameWorld();
+
+            }
+        }.start();
+
+
+        // Add children to AnchorPane and set to Anchors
+        anchorPane.getChildren().add(rootBP);
         AnchorPane.setTopAnchor(rootBP, 5.0d);
         AnchorPane.setLeftAnchor(rootBP, 5.0d);
         AnchorPane.setBottomAnchor(rootBP, 5.0d);
@@ -125,7 +156,7 @@ public class Anvil extends Application {
         primaryStage.show();
     }
 
-    private Player createPlayer() {
+    public Player createPlayer() {
         Dialog<Player> dialog = new Dialog<>();
         ButtonType createPlayerType = new ButtonType("Create Player", ButtonData.OK_DONE);
         dialog.setTitle("Create Player");

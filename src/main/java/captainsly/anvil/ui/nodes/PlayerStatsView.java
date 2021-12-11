@@ -1,7 +1,7 @@
 package captainsly.anvil.ui.nodes;
 
 import captainsly.Main;
-import captainsly.anvil.mechanics.SaveSystem;
+import captainsly.anvil.core.SaveSystem;
 import captainsly.anvil.mechanics.enums.EnumAbility;
 import captainsly.anvil.mechanics.enums.EnumSkill;
 import captainsly.anvil.mechanics.player.Player;

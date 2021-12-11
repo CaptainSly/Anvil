@@ -1,10 +1,6 @@
 package captainsly.anvil.mechanics.items;
 
-import org.luaj.vm2.lib.jse.CoerceJavaToLua;
-
-import captainsly.Main;
 import captainsly.anvil.mechanics.entities.Actor;
-import captainsly.utils.Utils;
 
 public class Potion extends Item {
 
@@ -25,7 +21,6 @@ public class Potion extends Item {
 
 	@Override
 	public void onUse(Actor actor) {
-		Main.globals.loadfile(Utils.WORKING_DIRECTORY + "scripts/" + potionScript).call();
-		Main.globals.get("onUse").invoke(CoerceJavaToLua.coerce(actor));
+		//TODO: Fix Script Usage
 	}
 }

@@ -243,12 +243,6 @@ public class Actor implements Serializable {
     }
 
     public void setActorRace(ActorRace actorRace) {
-        // Add The Actor's Racial Bonus to their stats and Skill Bonuses
-        for (int i = 0; i < actorAbilityScores.length; i++) {
-            actorAbilityScores[i] += actorRace.getActorRaceBenefitsAbility()[i];
-            actorSkills[i] += actorRace.getActorRaceBenefitsSkill()[i];
-        }
-
         this.actorRace = actorRace;
     }
 
@@ -261,11 +255,6 @@ public class Actor implements Serializable {
     }
 
     public void setActorCharacterClass(CharacterClass actorCharacterClass) {
-        // Add The Actor's Racial Bonus to their stats and Skill Bonuses
-        for (int i = 0; i < actorAbilityScores.length; i++) {
-            actorSkills[i] += actorCharacterClass.getCharacterClassSkillBonuses()[i];
-            actorAbilityScores[i] += actorCharacterClass.getCharacterClassAbilityBonuses()[i];
-        }
         this.actorCharacterClass = actorCharacterClass;
     }
 

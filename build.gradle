@@ -1,6 +1,6 @@
 plugins {
     id 'application'
-	id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
 }
 
 sourceCompatibility = 15
@@ -8,38 +8,48 @@ targetCompatibility = 15
 
 javafx {
     version = "15"
-    modules = [ 'javafx.controls' ]
+    modules = ['javafx.controls']
 }
 
 ext {
-	slf4jVersion = "1.7.32"
-	luajVersion = "3.0.1"
-	fontfxVersion = "8.9"
-	gsonVersion = "2.8.9"
-	anchorCommit = "0773eb4419"
+    slf4jVersion = "1.7.32"
+    luajVersion = "3.0.1"
+    fontfxVersion = "8.9"
+    gsonVersion = "2.8.9"
 }
 
 repositories {
-	mavenCentral()
-	maven { url 'https://jitpack.io' }
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+jar {
+	manifest {
+		attributes "Main-Class": "captainsly.Main"
+	}
+	
+	archiveClassifier = "all"
+  	from {
+    	configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    	configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 dependencies {
-	
-	// Other Deps
-	implementation 'com.bernardomg.tabletop:dice:2.1.2'
-	implementation "com.google.code.gson:gson:${gsonVersion}"
-	
-	// JavaFX
-	implementation "de.jensd:fontawesomefx:${fontfxVersion}"
-	implementation 'org.controlsfx:controlsfx:11.1.0'
-	implementation "com.github.alexbodogit:AnchorFX:${anchorCommit}"
 
-	// LuaJ
-	implementation "org.luaj:luaj-jse:${luajVersion}"
+    // https://mvnrepository.com/artifact/org.jruby/jruby-complete
+    implementation 'org.jruby:jruby-complete:9.2.19.0'
 
-	// Logging
-	implementation "org.slf4j:slf4j-api:${slf4jVersion}"
-	implementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+    // Other Deps
+    implementation 'com.bernardomg.tabletop:dice:2.1.2'
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+
+    // JavaFX
+    implementation "de.jensd:fontawesomefx:${fontfxVersion}"
+    implementation 'org.controlsfx:controlsfx:11.1.0'
+    
+    // Logging
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    implementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
 }
 

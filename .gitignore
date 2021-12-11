@@ -1,12 +1,10 @@
 # Ignore IDE and Gradle Files
-.idea
-.settings
-.vscode
-.gradle
-.classpath
-.project
-
-
+.idea/
+.settings/
+.vscode/
+.gradle/
+.classpath/
+.project/
 
 # Ignore Gradle build output directory
 build/

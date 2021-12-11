@@ -1,0 +1,43 @@
+{
+    "currentLocation": "locationCalinfor",
+    "player": {
+        "name": "Phil Collins",
+        "exp": 10000,
+        "currentHP": 18,
+        "currentMP": 19,
+        "abilityScores": {
+            "STRENGTH": 17,
+            "DEXTERITY": 13,
+            "CONSTITUTION": 13,
+            "INTELLIGENCE": 12,
+            "WISDOM": 14,
+            "CHARISMA": 14
+        },
+        "skillScores": {
+            "ONE_HANDED": 7,
+            "TWO_HANDED": 12,
+            "BLUNT": 13,
+            "LOCKPICKING": 17,
+            "PICKPOCKETING": 19,
+            "SMITHING": 18,
+            "ENCHANTING": 12,
+            "FISHING": 7,
+            "WOOD_CUTTING": 8,
+            "LIGHT_MAGIC": 9,
+            "DARK_MAGIC": 7,
+            "FIRE_MAGIC": 8,
+            "EARTH_MAGIC": 10,
+            "FROST_MAGIC": 7,
+            "WATER_MAGIC": 12,
+            "HEAVY_ARMOR": 7,
+            "LIGHT_ARMOR": 7,
+            "MEDIUM_ARMOR": 8
+        },
+        "actorRace": "raceElf01",
+        "actorClass": "classSorcerer",
+        "inventory": {},
+        "equippedArmor": {},
+        "equippedRings": {},
+        "equippedAmulets": {}
+    }
+}

@@ -1,6 +1,6 @@
 package captainsly.anvil.mechanics.world;
 
-import captainsly.anvil.mechanics.SaveSystem;
+import captainsly.anvil.core.SaveSystem;
 import captainsly.anvil.mechanics.locations.Location;
 import captainsly.anvil.mechanics.player.Player;
 import captainsly.anvil.ui.Anvil;
@@ -21,12 +21,12 @@ public class GameWorld {
 
     public void setCurrentLocation(Location currentLocation) {
         this.currentLocation = currentLocation;
-        anvil.setLocation(currentLocation);
     }
 
     /**
      * Updates the player involved views of the ui, anytime the player has triggered an event, or a player gets updated
      */
     public void updateGameWorld() {
+        // The GameWorld takes a queue of events and processes them based on their type
     }
 }

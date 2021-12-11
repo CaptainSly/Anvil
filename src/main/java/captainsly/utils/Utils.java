@@ -3,6 +3,7 @@ package captainsly.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -75,6 +76,44 @@ public class Utils {
         fileIn.close();
 
         return o;
+    }
+
+    public static String loadFileToString(String filePath) {
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            FileReader fr = new FileReader(filePath);
+            int c;
+
+            while ((c = fr.read()) != -1) {
+                sb.append((char) c);
+            }
+
+            fr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return sb.toString();
+    }
+
+    public static String loadFileToString(File file) {
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            FileReader fr = new FileReader(file);
+            int c;
+
+            while ((c = fr.read()) != -1) {
+                sb.append((char) c);
+            }
+
+            fr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return sb.toString();
     }
 
     public static boolean doesWorkingDirExist() {

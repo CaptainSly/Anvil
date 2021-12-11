@@ -1,4 +1,4 @@
-package captainsly.anvil.mechanics;
+package captainsly.anvil.core;
 
 import captainsly.Main;
 import captainsly.anvil.core.Registry;
@@ -19,76 +19,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/**
- * Player Data Format:
- * <p>
- * {
- * "currentLocation": "locationId",
- * "player": {
- * "name": "playerName",
- * "exp": "playerExp",
- * "abilityScores": {
- * "strength": "playerStrength",
- * "dexterity": "playerDexterity",
- * "constitution": "playerConstitution",
- * "intelligence": "playerIntelligence",
- * "wisdom": "playerWisdom",
- * "charisma": "playerCharisma"
- * },
- * "skillScores": {
- * "One_Handed": "playerOneHanded",
- * "Two_Handed": "playerTwoHanded",
- * "Blunt": "playerBlunt",
- * "Lockpicking": "playerLockpicking",
- * "Pickpocketing": "playerPickpocketing",
- * "Smithing": "playerSmithing",
- * "Enchanting": "playerEnchanting",
- * "Fishing": "playerFishing",
- * "Wood_Cutting": "playerWoodcutting",
- * "Light_Magic": "playerLightMagic",
- * "Dark_Magic": "playerDarkMagic",
- * "Fire_Magic": "playerFireMagic",
- * "Earth_Magic": "playerEarthMagic",
- * "Frost_Magic": "playerFrostMagic",
- * "Water_Magic": "playerWaterMagic",
- * "Heavy_Armor": "playerHeavyArmor",
- * "Light_Armor": "playerLightArmor",
- * "Medium_Armor": "playerMediumArmor",
- * },
- * "inventory": {
- * "slot01": {
- * "itemId": "itemId",
- * "itemCount": "itemCount"
- * }
- * },
- * "equippedArmor": {
- * "headEquipment": "headEquipmentId",
- * "chestEquipment": "chestEquipmentId",
- * "legsEquipment": "legsEquipmentId",
- * "feetEquipment": "feetEquipmentId",
- * "handsEquipment": "handsEquipmentId"
- * },
- * "equippedWeapon": "equippedWeaponId",
- * "equippedShield": "equippedShieldId",
- * "equippedRings": {
- * "ring01": "ring01Id",
- * "ring02": "ring02Id"
- * },
- * "equippedAmulets": {
- * "amulet01": "amulet01Id",
- * "amulet02": "amulet02Id"
- * },
- * }
- * }
- */
-
 public class SaveSystem {
 
+    public static File[] getSaveFiles() {
+        // Get a list of files from the save directory
+        return new File(Utils.SAVE_DIRECTORY).listFiles();
+    }
 
-    public static Player loadPlayerData(Anvil anvil) {
+    public static Player loadPlayerData(Anvil anvil, String fileName) {
         Player player = new Player();
         try {
-            File playerFile = new File(Utils.SAVE_DIRECTORY + "/azraein.json");
+            File playerFile = new File(Utils.SAVE_DIRECTORY + "/" + fileName);
             JsonReader reader = new JsonReader(new FileReader(playerFile));
             reader.beginObject();
             while (reader.hasNext()) {
