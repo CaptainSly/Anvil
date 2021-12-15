@@ -1,5 +1,7 @@
 package captainsly;
 
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ public class Main {
 
     public static final String APPLICATION_VERSION = "0.1.0B";
     public static final Logger log = LoggerFactory.getLogger("[MAIN]");
+    public static final Random rnJesus = new Random();
     public static AnvilScriptingEngine scriptingEngine;
 
     public static void main(String[] args) {

@@ -21,7 +21,6 @@ module Anvil
     	return Registry.getItem(itemId)
     end
     	
-    
     # Error Messages
     def info(message)
         Main.log.info("[ASE] - " + message)

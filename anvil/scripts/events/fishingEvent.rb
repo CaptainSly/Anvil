@@ -11,8 +11,8 @@ end
 
 def onActivate(actor)
     info("Fishing Event Activated")
-	location = getLocation("locationCalinfor")
-	debug(location.getLocationName())
-    debug(actor.getActorId())
+    caughtFish = getItem("item_Potion_HealthMinor")
+    actor.getActorInventory().addItem(caughtFish)
+    debug("Added " + caughtFish.getItemId() + " to the inventory")
 end
 

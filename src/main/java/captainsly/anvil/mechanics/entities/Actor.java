@@ -1,7 +1,10 @@
 package captainsly.anvil.mechanics.entities;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import captainsly.Main;
-import captainsly.anvil.mechanics.container.WeaponSlot;
 import captainsly.anvil.mechanics.container.EquipmentSlot;
 import captainsly.anvil.mechanics.container.Inventory;
 import captainsly.anvil.mechanics.container.ShieldSlot;
@@ -15,10 +18,6 @@ import captainsly.anvil.mechanics.factions.Faction;
 import captainsly.anvil.mechanics.items.equipment.Equipment;
 import captainsly.anvil.mechanics.magic.Spell;
 import captainsly.utils.Utils;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Actor implements Serializable {
 

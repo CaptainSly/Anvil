@@ -1,0 +1,11 @@
+{
+	"item_Potion_HealthMinor": {
+		"name": "Minor Health Potion",
+		"potionScript": "potionHealthMinor"
+	},
+	
+	"item_Potion_HealthMajor": {
+		"name": "Major Health Potion",
+		"potionScript": "potionHealthMajor"
+	}
+}

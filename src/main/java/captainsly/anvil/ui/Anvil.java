@@ -9,7 +9,6 @@ import captainsly.anvil.core.Registry;
 import captainsly.anvil.core.SaveSystem;
 import captainsly.anvil.mechanics.entities.actrace.ActorRace;
 import captainsly.anvil.mechanics.entities.cclass.CharacterClass;
-import captainsly.anvil.mechanics.events.GameEvent;
 import captainsly.anvil.mechanics.locations.Location;
 import captainsly.anvil.mechanics.objBuilders.ActorRaceBuilder.ActorRaceStringConverter;
 import captainsly.anvil.mechanics.objBuilders.CharacterClassBuilder.CharacterClassStringConverter;
@@ -20,6 +19,7 @@ import captainsly.anvil.ui.nodes.EquipmentSwatch;
 import captainsly.anvil.ui.nodes.InventoryView;
 import captainsly.anvil.ui.nodes.LoadPlayerDialog;
 import captainsly.anvil.ui.nodes.LocationActorView;
+import captainsly.anvil.ui.nodes.LocationEventView;
 import captainsly.anvil.ui.nodes.PlayerStatsView;
 import captainsly.utils.Utils;
 import javafx.animation.AnimationTimer;
@@ -46,227 +46,228 @@ import javafx.stage.Stage;
 
 public class Anvil extends Application {
 
-    // UI Nodes and Layout
-    private AnchorPane anchorPane;
-    private BorderPane rootBP, controlBP;
-    private HBox menuHBox;
-    private VBox locationNodesVBox;
-    private VBox playerOptionsVBox;
+	// UI Nodes and Layout
+	private AnchorPane anchorPane;
+	private BorderPane rootBP, controlBP;
+	private HBox menuHBox;
+	private VBox locationNodesVBox;
+	private VBox playerOptionsVBox;
 
-    private DirectionSwatch dirSwatch;
-    private EquipmentSwatch equipmentSwatch;
-    private InventoryView inventoryView;
-    private TextArea interactionTextArea;
-    private PlayerStatsView playerStatView;
-    private LocationActorView locationActorView;
-    private Location currentLocation;
+	private DirectionSwatch dirSwatch;
+	private EquipmentSwatch equipmentSwatch;
+	private InventoryView inventoryView;
+	private TextArea interactionTextArea;
+	private PlayerStatsView playerStatView;
+	private LocationActorView locationActorView;
+	private LocationEventView locationEventView;
+	private Location currentLocation;
 
-    private GameWorld gameWorld;
+	private GameWorld gameWorld;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        anchorPane = new AnchorPane();
-        rootBP = new BorderPane();
-        controlBP = new BorderPane();
-        menuHBox = new HBox();
-        playerOptionsVBox = new VBox();
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		anchorPane = new AnchorPane();
+		rootBP = new BorderPane();
+		controlBP = new BorderPane();
+		menuHBox = new HBox();
+		playerOptionsVBox = new VBox();
 
-        interactionTextArea = new TextArea();
-        interactionTextArea.setWrapText(true);
-        interactionTextArea.setEditable(false);
-        interactionTextArea.setStyle("-fx-font-size: 14");
+		interactionTextArea = new TextArea();
+		interactionTextArea.setWrapText(true);
+		interactionTextArea.setEditable(false);
+		interactionTextArea.setStyle("-fx-font-size: 14");
 
-        // Dummy Location to make sure it's loaded,
-        setCurrentLocation(Registry.getLocation("locationCalinfor"));
+		// Dummy Location to make sure it's loaded,
+		setCurrentLocation(Registry.getLocation("locationCalinfor"));
 
-        // Setup Player, either create a new one or load an existing one
-        Player player;
-        if (new File(Utils.SAVE_DIRECTORY).listFiles().length == 0) {
-            Main.log.debug("No save file found, creating new player");
-            player = createPlayer();
-            SaveSystem.savePlayerData(this, player);
-        } else {
-            Main.log.debug("Loading player data");
-            // Show a popup dialog that displays the save file name and asks if the user wants to load it
-            LoadPlayerDialog loadPlayerDialog = new LoadPlayerDialog(this);
-            player = loadPlayerDialog.showAndWait().get();
-        }
+		// Setup Player, either create a new one or load an existing one
+		Player player;
+		if (new File(Utils.SAVE_DIRECTORY).listFiles().length == 0) {
+			Main.log.debug("No save file found, creating new player");
+			player = createPlayer();
+			SaveSystem.savePlayerData(this, player);
+		} else {
+			Main.log.debug("Loading player data");
+			// Show a popup dialog that displays the save file name and asks if the user
+			// wants to load it
+			LoadPlayerDialog loadPlayerDialog = new LoadPlayerDialog(this);
+			player = loadPlayerDialog.showAndWait().get();
+		}
 
-        gameWorld = new GameWorld(this, player);
+		gameWorld = new GameWorld(this, player);
 
-		GameEvent gameEvent = new GameEvent("anvil/scripts/events/fishingEvent.rb");
-		gameEvent.onActivate(player);
+		inventoryView = new InventoryView(player);
+		equipmentSwatch = new EquipmentSwatch(player);
+		playerStatView = new PlayerStatsView(this, player);
 
+		locationActorView = new LocationActorView(this, currentLocation);
+		locationEventView = new LocationEventView(this, currentLocation);
+		dirSwatch = new DirectionSwatch(this);
+		setLocation(currentLocation);
 
-        inventoryView = new InventoryView(player);
-        equipmentSwatch = new EquipmentSwatch(player);
-        playerStatView = new PlayerStatsView(this, player);
+		menuHBox.getChildren().addAll();
 
-        locationActorView = new LocationActorView(this, currentLocation);
-        dirSwatch = new DirectionSwatch(this);
-        setLocation(currentLocation);
+		Separator sep = new Separator(Orientation.HORIZONTAL);
+		sep.setPadding(new Insets(1.5f, 0f, 1.5f, 0f));
 
-        menuHBox.getChildren().addAll();
+		playerOptionsVBox.setPadding(new Insets(5, 5, 5, 5));
+		playerOptionsVBox.getChildren().addAll(playerStatView, equipmentSwatch, sep, dirSwatch, inventoryView);
 
-        Separator sep = new Separator(Orientation.HORIZONTAL);
-        sep.setPadding(new Insets(1.5f, 0f, 1.5f, 0f));
+		// Setup up the locationsNodesVBox
+		locationNodesVBox = new VBox();
+		locationNodesVBox.setPadding(new Insets(5, 5, 5, 5));
+		locationNodesVBox.getChildren().addAll(locationActorView, locationEventView);
 
-        playerOptionsVBox.setPadding(new Insets(5, 5, 5, 5));
-        playerOptionsVBox.getChildren().addAll(playerStatView, equipmentSwatch, sep, dirSwatch, inventoryView);
+		// Set the Control BorderPane's left content to the plaerOptionsVBox
+		controlBP.setLeft(playerOptionsVBox);
 
-        // Setup up the locationsNodesVBox
-        locationNodesVBox = new VBox();
-        locationNodesVBox.setPadding(new Insets(5, 5, 5, 5));
-        locationNodesVBox.getChildren().addAll(locationActorView);
+		// Add the nodes to the Root BorderPane
+		rootBP.setTop(menuHBox);
+		rootBP.setLeft(controlBP);
+		rootBP.setRight(locationNodesVBox);
+		rootBP.setCenter(interactionTextArea);
 
-        // Set the Control BorderPane's left content to the plaerOptionsVBox
-        controlBP.setLeft(playerOptionsVBox);
+		// Setup the AnimationTimer "Game Loop"
+		final long startNanoTime = System.nanoTime();
+		new AnimationTimer() {
+			@Override
+			public void handle(long now) {
+				double delta = (now - startNanoTime) / 1000000000.0;
 
-        // Add the nodes to the Root BorderPane
-        rootBP.setTop(menuHBox);
-        rootBP.setLeft(controlBP);
-        rootBP.setRight(locationNodesVBox);
-        rootBP.setCenter(interactionTextArea);
+				// Update the game world
+				gameWorld.updateGameWorld();
 
-        // Setup the AnimationTimer "Game Loop"
-        final long startNanoTime = System.nanoTime();
-        new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                double delta = (now - startNanoTime) / 1000000000.0;
+			}
+		}.start();
 
-                // Update the game world
-                gameWorld.updateGameWorld();
+		// Add children to AnchorPane and set to Anchors
+		anchorPane.getChildren().add(rootBP);
+		AnchorPane.setTopAnchor(rootBP, 5.0d);
+		AnchorPane.setLeftAnchor(rootBP, 5.0d);
+		AnchorPane.setBottomAnchor(rootBP, 5.0d);
+		AnchorPane.setRightAnchor(rootBP, 5.0d);
 
-            }
-        }.start();
+		Scene scene = new Scene(anchorPane, 1280, 720);
+		primaryStage.getIcons().add(new Image("anvillogo.png"));
+		primaryStage.setTitle("Anvil");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
 
+	public Player createPlayer() {
+		Dialog<Player> dialog = new Dialog<>();
+		ButtonType createPlayerType = new ButtonType("Create Player", ButtonData.OK_DONE);
+		dialog.setTitle("Create Player");
+		dialog.setHeaderText("Pick your character class and race, and choose a name");
+		dialog.getDialogPane().getButtonTypes().add(createPlayerType);
 
-        // Add children to AnchorPane and set to Anchors
-        anchorPane.getChildren().add(rootBP);
-        AnchorPane.setTopAnchor(rootBP, 5.0d);
-        AnchorPane.setLeftAnchor(rootBP, 5.0d);
-        AnchorPane.setBottomAnchor(rootBP, 5.0d);
-        AnchorPane.setRightAnchor(rootBP, 5.0d);
+		// Dialog Nodes
+		BorderPane dialogRootPane = new BorderPane();
+		ChoiceBox<ActorRace> raceChoiceBox = new ChoiceBox<>();
+		ChoiceBox<CharacterClass> classChoiceBox = new ChoiceBox<>();
+		TextField playerNameField = new TextField();
+		TextArea descriptionArea = new TextArea();
 
-        Scene scene = new Scene(anchorPane, 1280, 720);
-        primaryStage.getIcons().add(new Image("anvillogo.png"));
-        primaryStage.setTitle("Anvil");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
+		descriptionArea.setEditable(false);
+		descriptionArea.setWrapText(true);
 
-    public Player createPlayer() {
-        Dialog<Player> dialog = new Dialog<>();
-        ButtonType createPlayerType = new ButtonType("Create Player", ButtonData.OK_DONE);
-        dialog.setTitle("Create Player");
-        dialog.setHeaderText("Pick your character class and race, and choose a name");
-        dialog.getDialogPane().getButtonTypes().add(createPlayerType);
+		raceChoiceBox.setConverter(new ActorRaceStringConverter());
+		raceChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ActorRace>() {
 
-        // Dialog Nodes
-        BorderPane dialogRootPane = new BorderPane();
-        ChoiceBox<ActorRace> raceChoiceBox = new ChoiceBox<>();
-        ChoiceBox<CharacterClass> classChoiceBox = new ChoiceBox<>();
-        TextField playerNameField = new TextField();
-        TextArea descriptionArea = new TextArea();
+			@Override
+			public void changed(ObservableValue<? extends ActorRace> observable, ActorRace oldValue,
+					ActorRace newValue) {
+				if (newValue != null) {
+					descriptionArea.clear();
+					descriptionArea.setText(newValue.getActorRaceName() + "\n" + newValue.getActorRaceDesc());
+				}
+			}
 
-        descriptionArea.setEditable(false);
-        descriptionArea.setWrapText(true);
+		});
 
-        raceChoiceBox.setConverter(new ActorRaceStringConverter());
-        raceChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ActorRace>() {
+		classChoiceBox.setConverter(new CharacterClassStringConverter());
+		classChoiceBox.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+			if (nv != null) {
+				descriptionArea.clear();
+				descriptionArea.setText(nv.getCharacterClassName() + "\n" + nv.getCharacterClassDesc());
+			}
+		});
 
-            @Override
-            public void changed(ObservableValue<? extends ActorRace> observable, ActorRace oldValue,
-                                ActorRace newValue) {
-                if (newValue != null) {
-                    descriptionArea.clear();
-                    descriptionArea.setText(newValue.getActorRaceName() + "\n" + newValue.getActorRaceDesc());
-                }
-            }
+		Iterator<Entry<String, ActorRace>> raceIterator = Registry.getActorRaceRegistry().entrySet().iterator();
+		while (raceIterator.hasNext()) {
+			ActorRace race = raceIterator.next().getValue();
+			raceChoiceBox.getItems().add(race);
+		}
 
-        });
+		Iterator<Entry<String, CharacterClass>> classIterator = Registry.getCharacterClassRegistry().entrySet()
+				.iterator();
+		while (classIterator.hasNext()) {
+			CharacterClass cclass = classIterator.next().getValue();
+			classChoiceBox.getItems().add(cclass);
+		}
 
-        classChoiceBox.setConverter(new CharacterClassStringConverter());
-        classChoiceBox.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
-            if (nv != null) {
-                descriptionArea.clear();
-                descriptionArea.setText(nv.getCharacterClassName() + "\n" + nv.getCharacterClassDesc());
-            }
-        });
+		Node createButton = dialog.getDialogPane().lookupButton(createPlayerType);
+		createButton.setDisable(true);
 
-        Iterator<Entry<String, ActorRace>> raceIterator = Registry.getActorRaceRegistry().entrySet().iterator();
-        while (raceIterator.hasNext()) {
-            ActorRace race = raceIterator.next().getValue();
-            raceChoiceBox.getItems().add(race);
-        }
+		playerNameField.textProperty().addListener(e -> {
+			createButton.setDisable(playerNameField.getText().isEmpty());
+		});
 
-        Iterator<Entry<String, CharacterClass>> classIterator = Registry.getCharacterClassRegistry().entrySet().iterator();
-        while (classIterator.hasNext()) {
-            CharacterClass cclass = classIterator.next().getValue();
-            classChoiceBox.getItems().add(cclass);
-        }
+		HBox hbox = new HBox();
+		hbox.getChildren().addAll(playerNameField, raceChoiceBox, classChoiceBox);
 
-        Node createButton = dialog.getDialogPane().lookupButton(createPlayerType);
-        createButton.setDisable(true);
+		dialog.setResultConverter(dialogButton -> {
+			Player player = new Player(raceChoiceBox.getValue(), classChoiceBox.getValue());
+			player.setActorName(playerNameField.getText());
 
-        playerNameField.textProperty().addListener(e -> {
-            createButton.setDisable(playerNameField.getText().isEmpty());
-        });
+			return player;
+		});
 
-        HBox hbox = new HBox();
-        hbox.getChildren().addAll(playerNameField, raceChoiceBox, classChoiceBox);
+		dialogRootPane.setCenter(hbox);
+		dialogRootPane.setBottom(descriptionArea);
+		dialog.getDialogPane().setContent(dialogRootPane);
+		return dialog.showAndWait().get();
+	}
 
-        dialog.setResultConverter(dialogButton -> {
-            Player player = new Player(raceChoiceBox.getValue(), classChoiceBox.getValue());
-            player.setActorName(playerNameField.getText());
+	public void setLocation(Location location) {
+		// TODO: Any special Classes that need their location switched when this one is
+		Main.log.debug("Switching to Location: " + location.getLocationName());
+		setCurrentLocation(location);
+		dirSwatch.setCurrentLocation(location.getLocationId());
+		locationActorView.updateLocation(location);
+		locationEventView.updateLocation(location);
 
-            return player;
-        });
+		// Update the GameWorld
+		gameWorld.setCurrentLocation(location);
+		gameWorld.updateGameWorld();
+	}
 
-        dialogRootPane.setCenter(hbox);
-        dialogRootPane.setBottom(descriptionArea);
-        dialog.getDialogPane().setContent(dialogRootPane);
-        return dialog.showAndWait().get();
-    }
+	public void update() {
+		// Update Any views that need to be updated in case of events
+	}
 
-    public void setLocation(Location location) {
-        // TODO: Any special Classes that need their location switched when this one is
-        setCurrentLocation(location);
-        dirSwatch.setCurrentLocation(location.getLocationId());
-        locationActorView.updateLocation(location);
+	public void setCurrentLocation(Location currentLocation) {
+		this.currentLocation = currentLocation;
+	}
 
-        // Update the GameWorld
-        gameWorld.setCurrentLocation(location);
-        gameWorld.updateGameWorld();
-    }
+	public void writeToConsole(String message) {
+		interactionTextArea.appendText(message + "\n");
+	}
 
-    public void update() {
-        // Update Any views that need to be updated in case of events
-    }
+	public void clearConsole() {
+		interactionTextArea.clear();
+	}
 
-    public void setCurrentLocation(Location currentLocation) {
-        this.currentLocation = currentLocation;
-    }
+	public Location getCurrentLocation() {
+		return currentLocation;
+	}
 
-    public void writeToConsole(String message) {
-        interactionTextArea.appendText(message + "\n");
-    }
+	public GameWorld getGameWorld() {
+		return gameWorld;
+	}
 
-    public void clearConsole() {
-        interactionTextArea.clear();
-    }
-
-    public Location getCurrentLocation() {
-        return currentLocation;
-    }
-
-    public GameWorld getGameWorld() {
-        return gameWorld;
-    }
-
-    public TextArea getConsole() {
-        return interactionTextArea;
-    }
+	public TextArea getConsole() {
+		return interactionTextArea;
+	}
 
 }

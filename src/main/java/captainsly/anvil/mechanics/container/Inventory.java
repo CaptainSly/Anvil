@@ -22,12 +22,21 @@ public class Inventory {
         ItemSlot slot = getFreeSlot();
         slot.addItem(item, amount);
     }
-
+    
+    
+    public void addItem(Item item) {
+    	addItem(item, 1);
+    }
+    
     public void removeItem(Item item, int amount) {
         ItemSlot slot = getItemSlotFromItem(item);
         slot.removeItem(amount);
     }
 
+    public void removeItem(Item item) {
+    	removeItem(item, 1);
+    }
+    
     public ItemSlot getItemSlotFromItem(Item item) {
         // Create a dummy itemslot
         ItemSlot dummySlot = null;

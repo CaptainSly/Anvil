@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import captainsly.anvil.mechanics.items.equipment.weapons.Weapon;
 import com.google.gson.stream.JsonReader;
 
 import captainsly.Main;
@@ -18,358 +17,416 @@ import captainsly.anvil.mechanics.enums.EnumDirection;
 import captainsly.anvil.mechanics.enums.EnumSkill;
 import captainsly.anvil.mechanics.events.GameEvent;
 import captainsly.anvil.mechanics.items.Item;
+import captainsly.anvil.mechanics.items.equipment.weapons.Weapon;
 import captainsly.anvil.mechanics.locations.Location;
 import captainsly.anvil.mechanics.objBuilders.ActorRaceBuilder;
 import captainsly.anvil.mechanics.objBuilders.CharacterClassBuilder;
 import captainsly.anvil.mechanics.objBuilders.LocationBuilder;
+import captainsly.anvil.mechanics.objBuilders.PotionBuilder;
 import captainsly.utils.Utils;
 
 public class Registry {
 
-    private static final Map<String, Item> itemRegistry = new HashMap<>();
-    private static final Map<String, Weapon> weaponRegistry = new HashMap<>();
-    private static final Map<String, ActorRace> actorRaceRegistry = new HashMap<>();
-    private static final Map<String, Location> locationRegistry = new HashMap<>();
-    private static final Map<String, CharacterClass> characterClassRegistry = new HashMap<>();
-    private static final Map<String, Actor> actorRegistry = new HashMap<>();
-    private static final Map<String, GameEvent> gameEventRegistry = new HashMap<>();
+	private static final Map<String, Item> itemRegistry = new HashMap<>();
+	private static final Map<String, Weapon> weaponRegistry = new HashMap<>();
+	private static final Map<String, ActorRace> actorRaceRegistry = new HashMap<>();
+	private static final Map<String, Location> locationRegistry = new HashMap<>();
+	private static final Map<String, CharacterClass> characterClassRegistry = new HashMap<>();
+	private static final Map<String, Actor> actorRegistry = new HashMap<>();
+	private static final Map<String, GameEvent> gameEventRegistry = new HashMap<>();
 
-    private static final File DATA_DIRECTORY_FILE = new File(Utils.WORKING_DIRECTORY + "data/");
+	private static final File DATA_DIRECTORY_FILE = new File(Utils.WORKING_DIRECTORY + "data/");
 
-    public static void register() {
-        Main.log.debug("Registering Objects to respective lists");
+	public static void register() {
+		Main.log.debug("Registering Objects to respective lists");
 
-        registerClasses();
-        registerRaces();
-        registerItems();
-        registerEquipments();
-        registerFactions();
-        registerActors();
-//        registerEvents();
-        registerLocations();
-    }
+		registerClasses();
+		registerRaces();
+		registerItems();
+		registerEquipments();
+		registerFactions();
+		registerActors();
+		registerEvents();
+		registerLocations();
+	}
 
-    private static void registerItems() {
-        // Register All of the different types of items here
-    }
+	private static void registerItems() {
+		// Register All of the different types of items here
 
-    private static void registerEquipments() {
-    }
+		for (File file : DATA_DIRECTORY_FILE.listFiles()) {
+			if (file.getName().equals("items.json")) {
+				try {
+					JsonReader reader = new JsonReader(new FileReader(file));
+					/**
+					 * Item JSON Scheme { "item_Potion_HealthMinor": { "name": "Minor Health
+					 * Potion", "potionScript": "potionHealthMinor" }, "item_Misc_Carp": { "name":
+					 * "Carp" }, "item_Food_Carp": { "name": "Carp" } }
+					 */
 
-    private static void registerFactions() {
-    }
+					// Register the items by reading in the file and parsing the json
+					// The Item Id contans which itemClass it belongs to
+					reader.beginObject();
+					while (reader.hasNext()) {
+						String currentOp = reader.peek().name();
+						Main.log.debug("Current Operation: " + currentOp);
 
-    private static void registerActors() {
-    }
+						String itemId = reader.nextName();
+						String itemClass = itemId.split("_")[1];
+						// Based on the itemClass toLowerCase, create the item
 
-    private static void registerClasses() {
-        // Loop through the data directory and search for the classes.json file
-        for (File file : DATA_DIRECTORY_FILE.listFiles()) {
-            if (file.getName().equals("classes.json")) { // THE FILE NAME SHOULD NEVER CHANGE
+						switch (itemClass.toLowerCase()) {
+						case "potion":
+							reader.beginObject();
+							while (reader.hasNext()) {
+								PotionBuilder potionBuilder = new PotionBuilder();
 
-                // Create a new json reader and read the file
-                // All Classes are located in one single file
-                try {
-                    JsonReader classReader = new JsonReader(new FileReader(file));
-                    // Begin opening the file
-                    classReader.beginObject();
-                    while (classReader.hasNext()) {
-                        // Inside the file, each class is it's own object with the name being the id
-                        // Create a classBuilder to create the class from the file and create dummy
-                        // variables to hold data
-                        CharacterClassBuilder classBuilder = new CharacterClassBuilder();
-                        String classId = classReader.nextName(), className = "", classDescription = "";
-                        int[] classAbilityBonuses = new int[EnumAbility.values().length];
-                        int[] classSkillBonuses = new int[EnumSkill.values().length];
+								String currentPotionToken = reader.peek().name();
+								String currentPotionOp = reader.nextName();
+								String potionName = "", potionScript = "";
 
-                        Main.log.debug("Creating CharacterClass: " + classId);
-                        classReader.beginObject();
-                        {
-                            while (classReader.hasNext()) {
-                                // Get the current "operation" that needs to be done
-                                String currentOp = classReader.nextName();
-                                Main.log.debug("Current CharacterClass Opeartion: " + currentOp);
+								Main.log.debug("Current Potion Token: " + currentPotionToken);
+								if (currentPotionOp.equals("name")) // Create the Potion here with the itemId and
+																	// itemName
+									potionName = reader.nextString();
 
-                                if (currentOp.equals("name")) // The Race Name
-                                    className = classReader.nextString();
-                                else if (currentOp.equals("description")) // The Race Description
-                                    classDescription = classReader.nextString();
-                                else if (currentOp.equals("abilityBonuses")) { // The Ability Bonuses
-                                    classReader.beginObject();
-                                    {
-                                        while (classReader.hasNext()) {
-                                            EnumAbility ability = EnumAbility
-                                                    .getAbilityFromString(classReader.nextName());
-                                            int abilityBonus = classReader.nextInt();
+								if (currentPotionOp.equals("potionScript"))
+									potionScript = reader.nextString();
 
-                                            Main.log.debug("Ability: " + ability.name() + ", +" + abilityBonus);
-                                            classAbilityBonuses[ability.ordinal()] = abilityBonus;
-                                        }
-                                    }
-                                    classReader.endObject();
-                                } else if (currentOp.equals("skillBonuses")) { // The Skill Bonuses
-                                    classReader.beginObject();
-                                    {
-                                        while (classReader.hasNext()) {
-                                            EnumSkill skill = EnumSkill.getSkillFromString(classReader.nextName());
-                                            int skillBonus = classReader.nextInt();
+								potionBuilder.createPotion(itemId, potionName).addScript(potionScript);
 
-                                            Main.log.debug("Skill: " + skill.name() + ", +" + skillBonus);
-                                            classSkillBonuses[skill.ordinal()] = skillBonus;
-                                        }
-                                    }
-                                    classReader.endObject();
-                                }
-                            }
-                        }
+								itemRegistry.put(itemId, potionBuilder.build());
+							}
+							reader.endObject();
+							break;
+						}
+					}
+					reader.endObject();
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
-                        // Build the race
-                        classBuilder.createCharacterClass(classId, className, classDescription);
-                        for (int i = 0; i < EnumAbility.values().length; i++)
-                            classBuilder.modifyCharacterAbility(EnumAbility.values()[i], i);
+	}
 
-                        for (int i = 0; i < EnumSkill.values().length; i++)
-                            classBuilder.modifyCharacterSkill(EnumSkill.values()[i], i);
+	private static void registerEquipments() {
+	}
 
-                        characterClassRegistry.put(classId, classBuilder.build());
-                        classReader.endObject();
+	private static void registerFactions() {
+	}
 
-                    }
-                    classReader.endObject();
-                    classReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+	private static void registerActors() {
+	}
 
-            }
-        }
-    }
+	private static void registerEvents() {
+		for (File file : new File(Utils.SCRIPT_DIRECTORY + "events/").listFiles()) {
+			String fileExt = file.getName().substring(file.getName().length() - 3);
+			if (fileExt.equals(".rb")) {
+				GameEvent event = new GameEvent(file.getAbsolutePath());
+				gameEventRegistry.put(event.getGameEventId(), event);
+			}
+		}
+	}
 
-    private static void registerRaces() {
-        // Loop through the data directory and search for the races.json file
-        for (File file : DATA_DIRECTORY_FILE.listFiles()) {
-            if (file.getName().equals("races.json")) { // THE FILE NAME SHOULD NEVER CHANGE
+	private static void registerClasses() {
+		// Loop through the data directory and search for the classes.json file
+		for (File file : DATA_DIRECTORY_FILE.listFiles()) {
+			if (file.getName().equals("classes.json")) { // THE FILE NAME SHOULD NEVER CHANGE
 
-                // Create a new json reader and read the file
-                // All races are located in one single file
-                try {
-                    JsonReader raceReader = new JsonReader(new FileReader(file));
-                    // Begin opening the file
-                    raceReader.beginObject();
-                    while (raceReader.hasNext()) {
-                        // Inside the file, each race is it's own object with the name being the id
-                        // Create a raceBuilder to create the race from the file and create dummy
-                        // variables to hold data
-                        ActorRaceBuilder raceBuilder = new ActorRaceBuilder();
-                        String raceId = raceReader.nextName(), raceName = "", raceDescription = "";
-                        int[] raceAbilityBonuses = new int[EnumAbility.values().length];
-                        int[] raceSkillBonuses = new int[EnumSkill.values().length];
+				// Create a new json reader and read the file
+				// All Classes are located in one single file
+				try {
+					JsonReader classReader = new JsonReader(new FileReader(file));
+					// Begin opening the file
+					classReader.beginObject();
+					while (classReader.hasNext()) {
+						// Inside the file, each class is it's own object with the name being the id
+						// Create a classBuilder to create the class from the file and create dummy
+						// variables to hold data
+						CharacterClassBuilder classBuilder = new CharacterClassBuilder();
+						String classId = classReader.nextName(), className = "", classDescription = "";
+						int[] classAbilityBonuses = new int[EnumAbility.values().length];
+						int[] classSkillBonuses = new int[EnumSkill.values().length];
 
-                        Main.log.debug("Creating race: " + raceId);
-                        raceReader.beginObject();
-                        {
-                            while (raceReader.hasNext()) {
-                                // Get the current "operation" that needs to be done
-                                String currentOp = raceReader.nextName();
-                                Main.log.debug("Current Race Opeartion: " + currentOp);
+						Main.log.debug("Creating CharacterClass: " + classId);
+						classReader.beginObject();
+						{
+							while (classReader.hasNext()) {
+								// Get the current "operation" that needs to be done
+								String currentOp = classReader.nextName();
+								Main.log.debug("Current CharacterClass Opeartion: " + currentOp);
 
-                                if (currentOp.equals("name")) // The Race Name
-                                    raceName = raceReader.nextString();
-                                else if (currentOp.equals("description")) // The Race Description
-                                    raceDescription = raceReader.nextString();
-                                else if (currentOp.equals("abilityBonuses")) { // The Ability Bonuses
-                                    raceReader.beginObject();
-                                    {
-                                        while (raceReader.hasNext()) {
-                                            EnumAbility ability = EnumAbility
-                                                    .getAbilityFromString(raceReader.nextName());
-                                            int abilityBonus = raceReader.nextInt();
+								if (currentOp.equals("name")) // The Race Name
+									className = classReader.nextString();
+								else if (currentOp.equals("description")) // The Race Description
+									classDescription = classReader.nextString();
+								else if (currentOp.equals("abilityBonuses")) { // The Ability Bonuses
+									classReader.beginObject();
+									{
+										while (classReader.hasNext()) {
+											EnumAbility ability = EnumAbility
+													.getAbilityFromString(classReader.nextName());
+											int abilityBonus = classReader.nextInt();
 
-                                            Main.log.debug("Ability: " + ability.name() + ", +" + abilityBonus);
-                                            raceAbilityBonuses[ability.ordinal()] = abilityBonus;
-                                        }
-                                    }
-                                    raceReader.endObject();
-                                } else if (currentOp.equals("skillBonuses")) { // The Skill Bonuses
-                                    raceReader.beginObject();
-                                    {
-                                        while (raceReader.hasNext()) {
-                                            EnumSkill skill = EnumSkill.getSkillFromString(raceReader.nextName());
-                                            int skillBonus = raceReader.nextInt();
+											Main.log.debug("Ability: " + ability.name() + ", +" + abilityBonus);
+											classAbilityBonuses[ability.ordinal()] = abilityBonus;
+										}
+									}
+									classReader.endObject();
+								} else if (currentOp.equals("skillBonuses")) { // The Skill Bonuses
+									classReader.beginObject();
+									{
+										while (classReader.hasNext()) {
+											EnumSkill skill = EnumSkill.getSkillFromString(classReader.nextName());
+											int skillBonus = classReader.nextInt();
 
-                                            Main.log.debug("Skill: " + skill.name() + ", +" + skillBonus);
-                                            raceSkillBonuses[skill.ordinal()] = skillBonus;
-                                        }
-                                    }
-                                    raceReader.endObject();
-                                }
-                            }
-                        }
+											Main.log.debug("Skill: " + skill.name() + ", +" + skillBonus);
+											classSkillBonuses[skill.ordinal()] = skillBonus;
+										}
+									}
+									classReader.endObject();
+								}
+							}
+						}
 
-                        // Build the race
-                        raceBuilder.createActorRace(raceId, raceName, raceDescription);
-                        for (int i = 0; i < EnumAbility.values().length; i++)
-                            raceBuilder.modifyAbility(EnumAbility.values()[i], raceAbilityBonuses[i]);
+						// Build the race
+						classBuilder.createCharacterClass(classId, className, classDescription);
+						for (int i = 0; i < EnumAbility.values().length; i++)
+							classBuilder.modifyCharacterAbility(EnumAbility.values()[i], i);
 
-                        for (int i = 0; i < EnumSkill.values().length; i++)
-                            raceBuilder.modifySkills(EnumSkill.values()[i], raceSkillBonuses[i]);
+						for (int i = 0; i < EnumSkill.values().length; i++)
+							classBuilder.modifyCharacterSkill(EnumSkill.values()[i], i);
 
-                        actorRaceRegistry.put(raceId, raceBuilder.build());
-                        raceReader.endObject();
+						characterClassRegistry.put(classId, classBuilder.build());
+						classReader.endObject();
 
-                    }
-                    raceReader.endObject();
-                    raceReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+					}
+					classReader.endObject();
+					classReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 
-            }
-        }
-    }
+			}
+		}
+	}
 
-    private static void registerEvents() {
-        // Look through the scripts/events folder and create an event for each script and load it into memory
-        File[] eventScriptFiles = new File(Utils.SCRIPT_DIRECTORY + "events/").listFiles();
-        for (int i = 0; i < eventScriptFiles.length; i++) {
-            if (eventScriptFiles[i].isFile()) {
-                Main.log.debug("Loading event script: " + eventScriptFiles[i].getName());
-                GameEvent event = new GameEvent(Utils.SCRIPT_DIRECTORY + "events/" + eventScriptFiles[i].getName());
-//                Main.log.debug("Event Script Loaded: " + event.getGameEventId());
-            }
-        }
-    }
+	private static void registerRaces() {
+		// Loop through the data directory and search for the races.json file
+		for (File file : DATA_DIRECTORY_FILE.listFiles()) {
+			if (file.getName().equals("races.json")) { // THE FILE NAME SHOULD NEVER CHANGE
 
-    private static void registerLocations() {
-        // Loop through the data directory and find the locations file
-        for (File file : DATA_DIRECTORY_FILE.listFiles()) {
-            if (file.getName().equals("locations.json")) {
-                // Found the file we're looking for
+				// Create a new json reader and read the file
+				// All races are located in one single file
+				try {
+					JsonReader raceReader = new JsonReader(new FileReader(file));
+					// Begin opening the file
+					raceReader.beginObject();
+					while (raceReader.hasNext()) {
+						// Inside the file, each race is it's own object with the name being the id
+						// Create a raceBuilder to create the race from the file and create dummy
+						// variables to hold data
+						ActorRaceBuilder raceBuilder = new ActorRaceBuilder();
+						String raceId = raceReader.nextName(), raceName = "", raceDescription = "";
+						int[] raceAbilityBonuses = new int[EnumAbility.values().length];
+						int[] raceSkillBonuses = new int[EnumSkill.values().length];
 
-                try {
-                    JsonReader locationReader = new JsonReader(new FileReader(file));
+						Main.log.debug("Creating race: " + raceId);
+						raceReader.beginObject();
+						{
+							while (raceReader.hasNext()) {
+								// Get the current "operation" that needs to be done
+								String currentOp = raceReader.nextName();
+								Main.log.debug("Current Race Opeartion: " + currentOp);
 
-                    // Parse the file
-                    locationReader.beginObject();
-                    while (locationReader.hasNext()) {
-                        // The First name should be the location id
-                        LocationBuilder locationBuilder = new LocationBuilder();
-                        String locationId = locationReader.nextName();
-                        String locationName = "", locationDescription = "";
+								if (currentOp.equals("name")) // The Race Name
+									raceName = raceReader.nextString();
+								else if (currentOp.equals("description")) // The Race Description
+									raceDescription = raceReader.nextString();
+								else if (currentOp.equals("abilityBonuses")) { // The Ability Bonuses
+									raceReader.beginObject();
+									{
+										while (raceReader.hasNext()) {
+											EnumAbility ability = EnumAbility
+													.getAbilityFromString(raceReader.nextName());
+											int abilityBonus = raceReader.nextInt();
 
-                        locationReader.beginObject();
-                        while (locationReader.hasNext()) {
-                            // Inside the location object begin it and get the actual location name
-                            {
-                                String currentOp = locationReader.nextName();
+											Main.log.debug("Ability: " + ability.name() + ", +" + abilityBonus);
+											raceAbilityBonuses[ability.ordinal()] = abilityBonus;
+										}
+									}
+									raceReader.endObject();
+								} else if (currentOp.equals("skillBonuses")) { // The Skill Bonuses
+									raceReader.beginObject();
+									{
+										while (raceReader.hasNext()) {
+											EnumSkill skill = EnumSkill.getSkillFromString(raceReader.nextName());
+											int skillBonus = raceReader.nextInt();
 
-                                if (currentOp.equals("name"))
-                                    locationName = locationReader.nextString();
-                                else if (currentOp.equals("description"))
-                                    locationDescription = locationReader.nextString();
-                                else if (currentOp.equals("neighbors")) {
-                                    // We have the name and description, throw it into the builder and get ready for
-                                    // the neighbors
-                                    locationBuilder.createLocation(locationId, locationName, locationDescription);
+											Main.log.debug("Skill: " + skill.name() + ", +" + skillBonus);
+											raceSkillBonuses[skill.ordinal()] = skillBonus;
+										}
+									}
+									raceReader.endObject();
+								}
+							}
+						}
 
-                                    locationReader.beginObject();
-                                    while (locationReader.hasNext()) {
-                                        String dir = locationReader.nextName();
-                                        String neighborId = locationReader.nextString();
+						// Build the race
+						raceBuilder.createActorRace(raceId, raceName, raceDescription);
+						for (int i = 0; i < EnumAbility.values().length; i++)
+							raceBuilder.modifyAbility(EnumAbility.values()[i], raceAbilityBonuses[i]);
 
-                                        locationBuilder.addNeighbor(neighborId,
-                                                EnumDirection.getDirectionFromString(dir));
+						for (int i = 0; i < EnumSkill.values().length; i++)
+							raceBuilder.modifySkills(EnumSkill.values()[i], raceSkillBonuses[i]);
 
-                                    }
-                                    locationReader.endObject();
-                                } else if (currentOp.equals("locationEvents")) {
-                                    // Since all the events are already loaded, add them to the list
-                                    locationReader.beginArray();
-                                    while (locationReader.hasNext()) {
-                                        locationBuilder.addEvent(locationReader.nextString());
-                                    }
-                                    locationReader.endArray();
-                                } else if (currentOp.equals("locationActors")) {
-                                    // Since all the actors are already loaded, add them to the list
-                                    locationReader.beginArray();
-                                    while (locationReader.hasNext()) {
-                                        locationBuilder.addActor(locationReader.nextString());
-                                    }
-                                    locationReader.endArray();
-                                }
+						actorRaceRegistry.put(raceId, raceBuilder.build());
+						raceReader.endObject();
 
-                                // End of the Location Declaration add it to the list
-                                Registry.locationRegistry.put(locationId, locationBuilder.build());
-                            }
-                        }
-                        locationReader.endObject();
-                    }
-                    locationReader.endObject();
+					}
+					raceReader.endObject();
+					raceReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 
-                    locationReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+			}
+		}
+	}
 
+	private static void registerLocations() {
+		// Loop through the data directory and find the locations file
+		for (File file : DATA_DIRECTORY_FILE.listFiles()) {
+			if (file.getName().equals("locations.json")) {
+				// Found the file we're looking for
 
-    public static Location getLocation(String locationId) {
-        return locationRegistry.get(locationId);
-    }
+				try {
+					JsonReader locationReader = new JsonReader(new FileReader(file));
 
-    public static Item getItem(String itemId) {
-        return itemRegistry.get(itemId);
-    }
+					// Parse the file
+					locationReader.beginObject();
+					while (locationReader.hasNext()) {
+						// The First name should be the location id
+						LocationBuilder locationBuilder = new LocationBuilder();
+						String locationId = locationReader.nextName();
+						String locationName = "", locationDescription = "";
 
-    public static Weapon getWeapon(String weaponId) {
-        return weaponRegistry.get(weaponId);
-    }
+						locationReader.beginObject();
+						while (locationReader.hasNext()) {
+							// Inside the location object begin it and get the actual location name
+							{
+								String currentOp = locationReader.nextName();
 
-    public static ActorRace getActorRace(String actorRaceId) {
-        return actorRaceRegistry.get(actorRaceId);
-    }
+								if (currentOp.equals("name"))
+									locationName = locationReader.nextString();
+								else if (currentOp.equals("description"))
+									locationDescription = locationReader.nextString();
+								else if (currentOp.equals("neighbors")) {
+									// We have the name and description, throw it into the builder and get ready for
+									// the neighbors
+									locationBuilder.createLocation(locationId, locationName, locationDescription);
 
-    public static CharacterClass getCharacterClass(String characterClassId) {
-        return characterClassRegistry.get(characterClassId);
-    }
+									locationReader.beginObject();
+									while (locationReader.hasNext()) {
+										String dir = locationReader.nextName();
+										String neighborId = locationReader.nextString();
 
-    public static Map<String, Item> getItemRegistry() {
-        return itemRegistry;
-    }
+										locationBuilder.addNeighbor(neighborId,
+												EnumDirection.getDirectionFromString(dir));
 
-    public static Map<String, Weapon> getWeaponRegistry() {
-        return weaponRegistry;
-    }
+									}
+									locationReader.endObject();
+								} else if (currentOp.equals("locationEvents")) {
+									// Since all the events are already loaded, add them to the list
+									locationReader.beginArray();
+									while (locationReader.hasNext()) {
+										String eventId = locationReader.nextString();
+										Main.log.debug("EventId: " + eventId);
+										locationBuilder.addEvent(eventId);
+									}
+									locationReader.endArray();
+								} else if (currentOp.equals("locationActors")) {
+									// Since all the actors are already loaded, add them to the list
+									locationReader.beginArray();
+									while (locationReader.hasNext()) {
+										locationBuilder.addActor(locationReader.nextString());
+									}
+									locationReader.endArray();
+								}
 
-    public static Map<String, ActorRace> getActorRaceRegistry() {
-        return actorRaceRegistry;
-    }
+							}
 
-    public static Map<String, Location> getLocationRegistry() {
-        return locationRegistry;
-    }
+						} // End of the Location Declaration add it to the list
+						locationReader.endObject();
+						Main.log.debug("Putting Location: " + locationId + " into registry`");
+						Registry.locationRegistry.put(locationId, locationBuilder.build());
 
-    public static Map<String, CharacterClass> getCharacterClassRegistry() {
-        return characterClassRegistry;
-    }
+					}
+					locationReader.endObject();
 
-    public static Map<String, Actor> getActorRegistry() {
-        return actorRegistry;
-    }
+					locationReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
-    public static Map<String, GameEvent> getGameEventRegistry() {
-        return gameEventRegistry;
-    }
+	public static Location getLocation(String locationId) {
+		return locationRegistry.get(locationId);
+	}
 
-    public static Actor getActor(String actorId) {
-        return actorRegistry.get(actorId);
-    }
+	public static Item getItem(String itemId) {
+		return itemRegistry.get(itemId);
+	}
 
-    public static GameEvent getGameEvent(String gameEventId) {
-        return gameEventRegistry.get(gameEventId);
-    }
+	public static Weapon getWeapon(String weaponId) {
+		return weaponRegistry.get(weaponId);
+	}
 
+	public static ActorRace getActorRace(String actorRaceId) {
+		return actorRaceRegistry.get(actorRaceId);
+	}
+
+	public static CharacterClass getCharacterClass(String characterClassId) {
+		return characterClassRegistry.get(characterClassId);
+	}
+
+	public static Map<String, Item> getItemRegistry() {
+		return itemRegistry;
+	}
+
+	public static Map<String, Weapon> getWeaponRegistry() {
+		return weaponRegistry;
+	}
+
+	public static Map<String, ActorRace> getActorRaceRegistry() {
+		return actorRaceRegistry;
+	}
+
+	public static Map<String, Location> getLocationRegistry() {
+		return locationRegistry;
+	}
+
+	public static Map<String, CharacterClass> getCharacterClassRegistry() {
+		return characterClassRegistry;
+	}
+
+	public static Map<String, Actor> getActorRegistry() {
+		return actorRegistry;
+	}
+
+	public static Map<String, GameEvent> getGameEventRegistry() {
+		return gameEventRegistry;
+	}
+
+	public static Actor getActor(String actorId) {
+		return actorRegistry.get(actorId);
+	}
+
+	public static GameEvent getGameEvent(String gameEventId) {
+		return gameEventRegistry.get(gameEventId);
+	}
 
 }

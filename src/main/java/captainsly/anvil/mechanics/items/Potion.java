@@ -1,5 +1,6 @@
 package captainsly.anvil.mechanics.items;
 
+import captainsly.Main;
 import captainsly.anvil.mechanics.entities.Actor;
 
 public class Potion extends Item {
@@ -12,15 +13,15 @@ public class Potion extends Item {
 		super(itemId, itemName);
 	}
 
-	public Potion() {
-	}
-
 	public void setPotionScript(String potionScript) {
 		this.potionScript = potionScript;
 	}
 
 	@Override
 	public void onUse(Actor actor) {
-		//TODO: Fix Script Usage
+		// TODO: Fix Script Usage
+		// Run Script
+		Main.scriptingEngine.loadScript("items/" + potionScript);
+		Main.scriptingEngine.runMethod("onUse", new Object[] { actor }, Actor.class);
 	}
 }
