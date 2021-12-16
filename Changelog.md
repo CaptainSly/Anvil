@@ -38,7 +38,7 @@ Working on the basic functionality of the game/engine/program. The Scripting eng
 The beginnings update will be finished when the following is done:
 * The Registry system is fleshed out, and includes the ability to load in all the correct data from json [WIP]
 * A Dialog System is created [N/A]
-* Basic Combat System is created [N/A]
+* Basic Combat System is created [WIP]
 * Event System is created [WIP]
 * A SaveSystem is created [WIP]
 
